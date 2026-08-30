@@ -29,7 +29,7 @@ const path = {
   adminUsers: '/admin/users',
   adminHotels: '/admin/hotels',
   adminBookings: '/admin/bookings',
-
+  adminCustomers: '/admin/customers',
   // =========================
   // HOTEL MANAGEMENT
   // =========================

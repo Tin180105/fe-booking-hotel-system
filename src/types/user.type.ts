@@ -21,6 +21,8 @@ export interface UpdateUserRequest {
   full_name?: string
   email?: string
   phone?: string | null
+  hotel_id?: number | null
+  role_code?: string
 }
 
 export interface UpdatedUserBasic {
@@ -41,4 +43,10 @@ export interface UpdateUserResponse {
 export interface DeleteUserResponse {
   status: 'success'
   message: string
+}
+
+export interface RoleOption {
+  id: number
+  name: string
+  code: string
 }

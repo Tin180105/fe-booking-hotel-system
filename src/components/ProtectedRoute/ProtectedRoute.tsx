@@ -13,7 +13,6 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { isAuthenticated, role } = useAuth()
   const location = useLocation()
-
   if (!isAuthenticated) {
     return <Navigate to={path.login} state={{ from: location }} replace />
   }

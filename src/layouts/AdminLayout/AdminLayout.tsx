@@ -12,12 +12,15 @@ import {
 
 import { useAuth } from '../../contexts/app.context'
 import path from '../../constants/path'
+import { MdPersonOutline } from 'react-icons/md'
+
 
 const menuItems = [
   { label: 'Tổng quan', icon: MdDashboard, to: path.adminDashboard },
   { label: 'Người dùng', icon: MdPeople, to: path.adminUsers },
   { label: 'Khách sạn', icon: MdHotel, to: path.adminHotels },
-  { label: 'Đặt phòng', icon: MdBookOnline, to: path.adminBookings }
+  { label: 'Đặt phòng', icon: MdBookOnline, to: path.adminBookings },
+  { label: 'Khách hàng', icon: MdPersonOutline, to: path.adminCustomers }
 ]
 
 const AdminLayout = () => {

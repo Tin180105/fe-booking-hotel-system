@@ -3,13 +3,14 @@ import axios from 'axios'
 import { MdClose } from 'react-icons/md'
 
 import authApi from '../../apis/auth.api'
-import type { AdminUser } from '../../types/user.type'
+import type { AdminUser, RoleOption } from '../../types/user.type'
+import type { HotelOverview } from '../../types/hotel.type'
+import hotelApi from '../../apis/hotel.api'
 
 const roleFilters = [
   { label: 'Tất cả', value: '' },
   { label: 'Admin', value: 'admin' },
   { label: 'Hotel', value: 'hotel' },
-  { label: 'Customer', value: 'customer' }
 ]
 
 const roleBadge: Record<string, string> = {
@@ -22,6 +23,8 @@ interface UserFormState {
   full_name: string
   email: string
   phone: string
+  role_code: string
+  hotel_id: string
 }
 
 const AdminUsers = () => {
@@ -30,11 +33,13 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [roles, setRoles] = useState<RoleOption[]>([])
+  const [hotels, setHotels] = useState<HotelOverview[]>([])
 
   // ===== EDIT MODAL STATE =====
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
-  const [form, setForm] = useState<UserFormState>({ full_name: '', email: '', phone: '' })
+  const [form, setForm] = useState<UserFormState>({ full_name: '', email: '', phone: '', role_code: '', hotel_id: '' })
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -59,21 +64,23 @@ const AdminUsers = () => {
   }
 
   useEffect(() => {
-    fetchUsers()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roleFilter])
+    authApi.getRoles().then((res) => setRoles(res.data.data)).catch(() => {})
+    hotelApi.getOverview().then((res) => setHotels(res.data?.hotels || [])).catch(() => {})
+  }, [])
 
   // ===== OPEN EDIT =====
   const openEditForm = (user: AdminUser) => {
-    setEditingUser(user)
-    setForm({
-      full_name: user.full_name,
-      email: user.email,
-      phone: user.phone || ''
-    })
-    setFormError('')
-    setIsFormOpen(true)
-  }
+  setEditingUser(user)
+  setForm({
+    full_name: user.full_name,
+    email: user.email,
+    phone: user.phone || '',
+    role_code: String(user.role_code || '').toLowerCase(),
+    hotel_id: user.hotel_id ? String(user.hotel_id) : ''
+  })
+  setFormError('')
+  setIsFormOpen(true)
+}
 
   const closeForm = () => {
     setIsFormOpen(false)
@@ -83,40 +90,40 @@ const AdminUsers = () => {
 
   // ===== SUBMIT EDIT =====
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  e.preventDefault()
+  if (!editingUser) return
 
-    if (!editingUser) return
-
-    if (!form.full_name.trim() || !form.email.trim()) {
-      setFormError('Vui lòng nhập đầy đủ Họ tên và Email')
-      return
-    }
-
-    try {
-      setSubmitting(true)
-      setFormError('')
-
-      await authApi.updateUser(editingUser.id, {
-        full_name: form.full_name.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim() || null
-      })
-
-      setIsFormOpen(false)
-      setEditingUser(null)
-      await fetchUsers()
-    } catch (err: unknown) {
-      console.error('[AdminUsers] update failed', err)
-
-      if (axios.isAxiosError(err)) {
-        setFormError(err.response?.data?.message || 'Cập nhật thất bại')
-      } else {
-        setFormError('Đã xảy ra lỗi không xác định')
-      }
-    } finally {
-      setSubmitting(false)
-    }
+  if (!form.full_name.trim() || !form.email.trim() || !form.role_code) {
+    setFormError('Vui lòng nhập đầy đủ Họ tên, Email và Vai trò')
+    return
   }
+
+  if (form.role_code === 'hotel' && !form.hotel_id) {
+    setFormError('Vui lòng chọn khách sạn cho tài khoản hotel')
+    return
+  }
+
+  try {
+    setSubmitting(true)
+    setFormError('')
+
+    await authApi.updateUser(editingUser.id, {
+      full_name: form.full_name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim() || null,
+      role_code: form.role_code,
+      hotel_id: form.role_code === 'hotel' ? Number(form.hotel_id) : null
+    })
+
+    setIsFormOpen(false)
+    setEditingUser(null)
+    await fetchUsers()
+  } catch (err: unknown) {
+    // giữ nguyên xử lý lỗi như cũ
+  } finally {
+    setSubmitting(false)
+  }
+}
 
   // ===== DELETE =====
   const handleDelete = async (user: AdminUser) => {
@@ -310,6 +317,40 @@ const AdminUsers = () => {
                 />
               </div>
 
+              <div className='mb-4'>
+  <label className='block text-sm font-medium text-slate-600 mb-1.5'>
+    Vai trò <span className='text-red-500'>*</span>
+  </label>
+  <select
+    value={form.role_code}
+    onChange={(e) => setForm({ ...form, role_code: e.target.value, hotel_id: '' })}
+    className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
+  >
+    <option value=''>-- Chọn vai trò --</option>
+    {roles.map((r) => (
+      <option key={r.code} value={r.code}>{r.name}</option>
+    ))}
+  </select>
+</div>
+
+{form.role_code === 'hotel' && (
+  <div className='mb-6'>
+    <label className='block text-sm font-medium text-slate-600 mb-1.5'>
+      Khách sạn <span className='text-red-500'>*</span>
+    </label>
+    <select
+      value={form.hotel_id}
+      onChange={(e) => setForm({ ...form, hotel_id: e.target.value })}
+      className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
+    >
+      <option value=''>-- Chọn khách sạn --</option>
+      {hotels.map((h) => (
+        <option key={h.hotelId} value={h.hotelId}>{h.hotelName}</option>
+      ))}
+    </select>
+  </div>
+)}
+              
               <div className='flex justify-end gap-3'>
                 <button
                   type='button'

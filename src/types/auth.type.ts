@@ -12,6 +12,7 @@ export interface User {
   email: string
   role_id: number
   role_code: UserRole
+  hotel_id?: number | null
 }
 
 export interface LoginPayload {

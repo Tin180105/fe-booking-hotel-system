@@ -13,7 +13,8 @@ import type {
   AdminUserListResponse,
   UpdateUserRequest,
   UpdateUserResponse,
-  DeleteUserResponse
+  DeleteUserResponse,
+  RoleOption
 } from '../types/user.type'
 
 export const URL_LOGIN = '/auth/login'
@@ -57,7 +58,11 @@ const authApi = {
 
   deleteUser(id: number) {
     return http.delete<DeleteUserResponse>(`${URL_USERS}/${id}`)
-  }
+  },
+
+  getRoles() {
+  return http.get<{ status: 'success'; data: RoleOption[] }>('/auth/roles')
+}
 }
 
 export default authApi
