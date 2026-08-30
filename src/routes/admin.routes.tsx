@@ -4,6 +4,9 @@ import AdminLayout from '../layouts/AdminLayout'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 import AdminDashboard from '../pages/AdminDashboard'
+import AdminHotels from '../pages/AdminHotels'
+import AdminUsers from '../pages/AdminUsers'
+//import AdminBookings from '../pages/AdminBookings'
 
 const adminRoutes: RouteObject[] = [
   {
@@ -14,9 +17,10 @@ const adminRoutes: RouteObject[] = [
       </ProtectedRoute>
     ),
     children: [
-      { path: 'dashboard', element: <AdminDashboard /> }
-      // sau này thêm: { path: 'hotels', element: <AdminHotels /> }
-      // sau này thêm: { path: 'users', element: <AdminUsers /> }
+      { path: 'dashboard', element: <AdminDashboard /> },
+      { path: 'hotels', element: <AdminHotels /> },
+      { path: 'users', element: <AdminUsers /> },
+      //{ path: 'bookings', element: <AdminBookings /> }
     ]
   }
 ]
