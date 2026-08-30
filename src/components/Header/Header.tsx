@@ -31,7 +31,7 @@ const Header = () => {
             <a href='/'>
               <div className='leading-none'>
                 <div className='text-[34px] font-bold tracking-tight'>
-                  i<span className='text-[#5dc4d4]'>VIVU</span>
+                  <span className='text-[#5dc4d4]'>StayFlow</span>
                 </div>
 
                 <div className='text-[22px] text-[#5dc4d4] text-right'>
@@ -54,28 +54,14 @@ const Header = () => {
               href='/tour'
               className='h-full flex items-center px-5 text-[22px] font-medium hover:text-[#6ac2d4] transition'
             >
-              Tour
+              Địa điểm
             </a>
 
             <a
               href='/flights'
               className='h-full flex items-center px-5 text-[22px] font-medium hover:text-[#6ac2d4] transition'
             >
-              Vé máy bay
-            </a>
-
-            <a
-              href='/entertainment'
-              className='h-full flex items-center px-5 text-[22px] font-medium hover:text-[#6ac2d4] transition'
-            >
-              Vé vui chơi
-            </a>
-
-            <a
-              href='/train'
-              className='h-full flex items-center px-5 text-[22px] font-medium hover:text-[#6ac2d4] transition'
-            >
-              Vé tàu
+              Ưu đãi
             </a>
 
             <button

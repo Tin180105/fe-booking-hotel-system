@@ -23,7 +23,7 @@ const Footer = () => {
           {/* VỀ iVIVU */}
           <div>
             <h3 className='font-bold text-[18px] mb-2'>
-              Về iVIVU.com
+              Về StayFlow.com
             </h3>
 
             <ul className='space-y-2 text-[16px] text-gray-500'>
