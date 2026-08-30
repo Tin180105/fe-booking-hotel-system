@@ -3,6 +3,7 @@ import type { RouteObject } from 'react-router-dom'
 import PublicLayout from '../layouts/PublicLayout'
 import ProtectedRoute from '../components/ProtectedRoute'
 
+import Home from '../pages/Home'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
 import HotelDashboard from '../pages/HotelDashboard/HotelDashboard'
@@ -13,7 +14,7 @@ const publicRoutes: RouteObject[] = [
   {
     element: <PublicLayout />,
     children: [
-      { path: path.home, element: <div>Trang chủ</div> },
+      { path: path.home, element: <Home/> },
       { path: path.login, element: <Login /> },
       { path: path.register, element: <Register /> },
       {
