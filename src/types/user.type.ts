@@ -50,3 +50,17 @@ export interface RoleOption {
   name: string
   code: string
 }
+
+export interface CreateUserRequest {
+  full_name: string
+  email: string
+  password: string
+  phone?: string
+  role_code: string
+  hotel_id?: number | null
+}
+
+export interface CreateUserResponse {
+  status: 'success'
+  data: UpdatedUserBasic
+}

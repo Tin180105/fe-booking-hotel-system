@@ -12,7 +12,14 @@ const roleFilters = [
   { label: 'Admin', value: 'admin' },
   { label: 'Hotel', value: 'hotel' },
 ]
-
+const emptyCreateForm = {
+  full_name: '',
+  email: '',
+  password: '',
+  phone: '',
+  role_code: '',
+  hotel_id: ''
+}
 const roleBadge: Record<string, string> = {
   admin: 'bg-purple-50 text-purple-600',
   hotel: 'bg-blue-50 text-blue-600',
@@ -42,7 +49,64 @@ const AdminUsers = () => {
   const [form, setForm] = useState<UserFormState>({ full_name: '', email: '', phone: '', role_code: '', hotel_id: '' })
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [createForm, setCreateForm] = useState(emptyCreateForm)
+  const [createError, setCreateError] = useState('')
+  const [creating, setCreating] = useState(false)
+  const openCreateForm = () => {
+  setCreateForm(emptyCreateForm)
+  setCreateError('')
+  setIsCreateOpen(true)
+}
 
+const closeCreateForm = () => {
+  setIsCreateOpen(false)
+  setCreateError('')
+}
+
+const handleCreateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault()
+
+  if (!createForm.full_name.trim() || !createForm.email.trim() || !createForm.password.trim() || !createForm.role_code) {
+    setCreateError('Vui lòng nhập đầy đủ Họ tên, Email, Mật khẩu và Vai trò')
+    return
+  }
+
+  if (createForm.password.length < 6) {
+    setCreateError('Mật khẩu phải có ít nhất 6 ký tự')
+    return
+  }
+
+  if (createForm.role_code === 'hotel' && !createForm.hotel_id) {
+    setCreateError('Vui lòng chọn khách sạn cho tài khoản hotel')
+    return
+  }
+
+  try {
+    setCreating(true)
+    setCreateError('')
+
+    await authApi.createUser({
+      full_name: createForm.full_name.trim(),
+      email: createForm.email.trim(),
+      password: createForm.password,
+      phone: createForm.phone.trim() || undefined,
+      role_code: createForm.role_code,
+      hotel_id: createForm.role_code === 'hotel' ? Number(createForm.hotel_id) : null
+    })
+
+    setIsCreateOpen(false)
+    await fetchUsers()
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      setCreateError(err.response?.data?.message || 'Tạo tài khoản thất bại')
+    } else {
+      setCreateError('Đã xảy ra lỗi không xác định')
+    }
+  } finally {
+    setCreating(false)
+  }
+}
   const fetchUsers = async () => {
     try {
       setLoading(true)
@@ -64,9 +128,13 @@ const AdminUsers = () => {
   }
 
   useEffect(() => {
-    authApi.getRoles().then((res) => setRoles(res.data.data)).catch(() => {})
-    hotelApi.getOverview().then((res) => setHotels(res.data?.hotels || [])).catch(() => {})
-  }, [])
+  fetchUsers()
+}, [roleFilter])
+
+useEffect(() => {
+  authApi.getRoles().then((res) => setRoles(res.data.data)).catch(() => {})
+  hotelApi.getOverview().then((res) => setHotels(res.data?.hotels || [])).catch(() => {})
+}, [])
 
   // ===== OPEN EDIT =====
   const openEditForm = (user: AdminUser) => {
@@ -153,10 +221,20 @@ const AdminUsers = () => {
 
   return (
     <div className='p-8'>
-      <div className='mb-6'>
-        <p className='mb-1 text-sm font-semibold uppercase tracking-[0.2em] text-blue-600'>Admin</p>
-        <h1 className='text-3xl font-bold text-slate-800'>Quản lý người dùng</h1>
-      </div>
+      <div className='mb-6 flex items-center justify-between'>
+  <div>
+    <p className='mb-1 text-sm font-semibold uppercase tracking-[0.2em] text-blue-600'>Admin</p>
+    <h1 className='text-3xl font-bold text-slate-800'>Quản lý người dùng</h1>
+  </div>
+
+  <button
+    type='button'
+    onClick={openCreateForm}
+    className='px-5 py-2.5 rounded-md bg-[#0280ff] text-white font-semibold hover:bg-[#1612eb] transition'
+  >
+    + Tạo tài khoản
+  </button>
+</div>
 
       {/* FILTER TABS */}
       <div className='flex items-center gap-2 mb-5'>
@@ -265,21 +343,39 @@ const AdminUsers = () => {
         </div>
       </div>
 
-      {/* ===== EDIT MODAL ===== */}
+            {/* ===== EDIT MODAL ===== */}
       {isFormOpen && editingUser && (
         <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4'>
           <div className='bg-white rounded-xl w-full max-w-[460px]'>
+            {/* ... header ... */}
+            <form onSubmit={handleSubmit} className='px-6 py-5'>
+              {/* Họ tên */}
+              {/* Email */}
+              {/* Số điện thoại */}
+              {/* ❌ KHÔNG để Create Modal ở đây nữa */}
+              {/* Vai trò */}
+              {/* Khách sạn (nếu hotel) */}
+              {/* Hủy / Lưu thay đổi */}
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===== CREATE MODAL ===== ✅ đặt ở đây, ngang hàng với EDIT MODAL */}
+      {isCreateOpen && (
+        <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4'>
+          <div className='bg-white rounded-xl w-full max-w-[460px]'>
             <div className='flex items-center justify-between px-6 py-4 border-b border-slate-200'>
-              <h2 className='text-lg font-semibold text-slate-800'>Sửa thông tin người dùng</h2>
-              <button type='button' onClick={closeForm} className='text-slate-400 hover:text-slate-700'>
+              <h2 className='text-lg font-semibold text-slate-800'>Tạo tài khoản mới</h2>
+              <button type='button' onClick={closeCreateForm} className='text-slate-400 hover:text-slate-700'>
                 <MdClose size={22} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className='px-6 py-5'>
-              {formError && (
+            <form onSubmit={handleCreateSubmit} className='px-6 py-5'>
+              {createError && (
                 <div className='mb-4 rounded-md bg-red-50 border border-red-200 px-4 py-2.5 text-red-600 text-sm'>
-                  {formError}
+                  {createError}
                 </div>
               )}
 
@@ -289,8 +385,8 @@ const AdminUsers = () => {
                 </label>
                 <input
                   type='text'
-                  value={form.full_name}
-                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                  value={createForm.full_name}
+                  onChange={(e) => setCreateForm({ ...createForm, full_name: e.target.value })}
                   className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
                 />
               </div>
@@ -301,70 +397,82 @@ const AdminUsers = () => {
                 </label>
                 <input
                   type='email'
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
-                />
-              </div>
-
-              <div className='mb-6'>
-                <label className='block text-sm font-medium text-slate-600 mb-1.5'>Số điện thoại</label>
-                <input
-                  type='text'
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  value={createForm.email}
+                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
                   className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
                 />
               </div>
 
               <div className='mb-4'>
-  <label className='block text-sm font-medium text-slate-600 mb-1.5'>
-    Vai trò <span className='text-red-500'>*</span>
-  </label>
-  <select
-    value={form.role_code}
-    onChange={(e) => setForm({ ...form, role_code: e.target.value, hotel_id: '' })}
-    className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
-  >
-    <option value=''>-- Chọn vai trò --</option>
-    {roles.map((r) => (
-      <option key={r.code} value={r.code}>{r.name}</option>
-    ))}
-  </select>
-</div>
+                <label className='block text-sm font-medium text-slate-600 mb-1.5'>
+                  Mật khẩu <span className='text-red-500'>*</span>
+                </label>
+                <input
+                  type='password'
+                  value={createForm.password}
+                  onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                  className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
+                />
+              </div>
 
-{form.role_code === 'hotel' && (
-  <div className='mb-6'>
-    <label className='block text-sm font-medium text-slate-600 mb-1.5'>
-      Khách sạn <span className='text-red-500'>*</span>
-    </label>
-    <select
-      value={form.hotel_id}
-      onChange={(e) => setForm({ ...form, hotel_id: e.target.value })}
-      className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
-    >
-      <option value=''>-- Chọn khách sạn --</option>
-      {hotels.map((h) => (
-        <option key={h.hotelId} value={h.hotelId}>{h.hotelName}</option>
-      ))}
-    </select>
-  </div>
-)}
-              
+              <div className='mb-4'>
+                <label className='block text-sm font-medium text-slate-600 mb-1.5'>Số điện thoại</label>
+                <input
+                  type='text'
+                  value={createForm.phone}
+                  onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })}
+                  className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
+                />
+              </div>
+
+              <div className='mb-4'>
+                <label className='block text-sm font-medium text-slate-600 mb-1.5'>
+                  Vai trò <span className='text-red-500'>*</span>
+                </label>
+                <select
+                  value={createForm.role_code}
+                  onChange={(e) => setCreateForm({ ...createForm, role_code: e.target.value, hotel_id: '' })}
+                  className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
+                >
+                  <option value=''>-- Chọn vai trò --</option>
+                  {roles.map((r) => (
+                    <option key={r.code} value={r.code}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {createForm.role_code === 'hotel' && (
+                <div className='mb-6'>
+                  <label className='block text-sm font-medium text-slate-600 mb-1.5'>
+                    Khách sạn <span className='text-red-500'>*</span>
+                  </label>
+                  <select
+                    value={createForm.hotel_id}
+                    onChange={(e) => setCreateForm({ ...createForm, hotel_id: e.target.value })}
+                    className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
+                  >
+                    <option value=''>-- Chọn khách sạn --</option>
+                    {hotels.map((h) => (
+                      <option key={h.hotelId} value={h.hotelId}>{h.hotelName}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className='flex justify-end gap-3'>
                 <button
                   type='button'
-                  onClick={closeForm}
+                  onClick={closeCreateForm}
                   className='px-5 py-2.5 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50'
                 >
                   Hủy
                 </button>
                 <button
                   type='submit'
-                  disabled={submitting}
+                  disabled={creating}
                   className='px-5 py-2.5 rounded-md bg-[#0280ff] text-white font-semibold hover:bg-[#1612eb] disabled:opacity-60'
                 >
-                  {submitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+                  {creating ? 'Đang tạo...' : 'Tạo tài khoản'}
                 </button>
               </div>
             </form>

@@ -14,7 +14,9 @@ import type {
   UpdateUserRequest,
   UpdateUserResponse,
   DeleteUserResponse,
-  RoleOption
+  RoleOption,
+  CreateUserRequest,
+  CreateUserResponse
 } from '../types/user.type'
 
 export const URL_LOGIN = '/auth/login'
@@ -62,7 +64,10 @@ const authApi = {
 
   getRoles() {
   return http.get<{ status: 'success'; data: RoleOption[] }>('/auth/roles')
-}
+},
+  createUser(body: CreateUserRequest) {
+    return http.post<CreateUserResponse>(URL_USERS, body)
+  }
 }
 
 export default authApi
