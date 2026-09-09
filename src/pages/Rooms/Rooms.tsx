@@ -234,22 +234,6 @@ const Rooms = () => {
 
             <div>
 
-              <div className='flex items-center gap-2 mb-2'>
-
-                <span className='bg-[#ff9d1c] text-white px-3 py-1 rounded-md text-sm font-bold'>
-                  4.8/5
-                </span>
-
-                <span className='text-yellow-300'>
-                  ★★★★★
-                </span>
-
-                <span className='text-blue-100'>
-                  326 đánh giá
-                </span>
-
-              </div>
-
               <h1 className='text-[36px] font-bold tracking-tight'>
                 {hotelName}
               </h1>
