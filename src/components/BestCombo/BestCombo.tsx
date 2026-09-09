@@ -67,10 +67,32 @@ const BestCombo = () => {
 
   return (
     <section className='max-w-[1280px] mx-auto px-4 py-8'>
-      <div className='mb-6'>
-        <h2 className='text-3xl font-bold text-slate-800'>
-          Best Hotel
-        </h2>
+      <div className='mb-8 border-b border-slate-200 pb-5'>
+        <div className='flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'>
+          <div>
+            <div className='mb-2 flex items-center gap-2'>
+              <span className='h-2 w-2 rounded-full bg-orange-500' />
+              <p className='text-xs font-bold uppercase tracking-[0.2em] text-orange-600'>
+                StayFlow tuyển chọn
+              </p>
+            </div>
+
+            <h2 className='text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl'>
+              Best <span className='text-orange-500'>Hotel</span>
+            </h2>
+
+            <p className='mt-2 max-w-xl text-sm leading-6 text-slate-500 sm:text-base'>
+              Những điểm lưu trú nổi bật cho một kỳ nghỉ trọn vẹn và đáng nhớ.
+            </p>
+          </div>
+
+          <div className='flex w-fit items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-700'>
+            <span className='text-lg leading-none'>{hotels.length}</span>
+            <span>khách sạn nổi bật</span>
+          </div>
+        </div>
+
+        <div className='mt-5 h-1 w-16 rounded-full bg-orange-500' />
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'>
