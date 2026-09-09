@@ -9,24 +9,29 @@ import type {
   LogoutResponse
 } from '../types/auth.type'
 
+import type {
+  AdminUserListResponse,
+  UpdateUserRequest,
+  UpdateUserResponse,
+  DeleteUserResponse,
+  RoleOption,
+  CreateUserRequest,
+  CreateUserResponse
+} from '../types/user.type'
+
 export const URL_LOGIN = '/auth/login'
 export const URL_REGISTER = '/auth/register'
 export const URL_REFRESH = '/auth/refresh-token'
 export const URL_LOGOUT = '/auth/logout'
+export const URL_USERS = '/auth/users'
 
 const authApi = {
   register(body: RegisterPayload) {
-    return http.post<RegisterResponse>(
-      URL_REGISTER,
-      body
-    )
+    return http.post<RegisterResponse>(URL_REGISTER, body)
   },
 
   login(body: LoginPayload) {
-    return http.post<LoginResponse>(
-      URL_LOGIN,
-      body
-    )
+    return http.post<LoginResponse>(URL_LOGIN, body)
   },
 
   refreshToken(refreshToken?: string) {
@@ -41,6 +46,27 @@ const authApi = {
       URL_LOGOUT,
       refreshToken ? { refreshToken } : {}
     )
+  },
+
+  getUsers(roleCode?: string) {
+    return http.get<AdminUserListResponse>(URL_USERS, {
+      params: roleCode ? { role: roleCode } : undefined
+    })
+  },
+
+  updateUser(id: number, body: UpdateUserRequest) {
+    return http.patch<UpdateUserResponse>(`${URL_USERS}/${id}`, body)
+  },
+
+  deleteUser(id: number) {
+    return http.delete<DeleteUserResponse>(`${URL_USERS}/${id}`)
+  },
+
+  getRoles() {
+  return http.get<{ status: 'success'; data: RoleOption[] }>('/auth/roles')
+},
+  createUser(body: CreateUserRequest) {
+    return http.post<CreateUserResponse>(URL_USERS, body)
   }
 }
 

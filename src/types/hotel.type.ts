@@ -15,17 +15,48 @@ export interface HotelOverviewResponse {
   hotels: HotelOverview[]
 }
 
-export interface HotelHome {
+export interface Hotel {
   id: number
   name: string
   city: string
   address: string
+  phone: string | null
   description: string | null
+  commissionRate: number
   starRating: number
   status: string
-  imageUrl: string | null
+  createdAt: string
 }
 
-export interface HotelHomeResponse {
-  hotels: HotelHome[]
+export interface CreateHotelRequest {
+  name: string
+  city: string
+  address: string
+  phone?: string
+  description?: string
+  commissionRate?: number
+  starRating?: number
+}
+
+export interface UpdateHotelRequest {
+  name?: string
+  city?: string
+  address?: string
+  phone?: string
+  description?: string
+  commissionRate?: number
+  starRating?: number
+}
+
+export interface HotelDetailResponse {
+  hotel: Hotel
+}
+
+export interface HotelMutationResponse {
+  message: string
+  hotel: Hotel
+}
+
+export interface DeleteHotelResponse {
+  message: string
 }
