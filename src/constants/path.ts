@@ -39,6 +39,7 @@ const path = {
   hotelRooms: '/hotel/rooms',
   hotelBookings: '/hotel/bookings',
   hotelAmenities: '/hotel/amenities',
+  search: '/search',
 
   // =========================
   // NOT FOUND

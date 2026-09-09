@@ -6,15 +6,17 @@ import {
   FaClock
 } from 'react-icons/fa'
 
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { FiChevronDown } from 'react-icons/fi'
 import { HiOutlineDotsHorizontal } from 'react-icons/hi'
 
 import { useAuth } from '../../contexts/app.context'
+import path from '../../constants/path'
 
 const Header = () => {
   const [isAccountOpen, setIsAccountOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
   const { isAuthenticated, profile, logout } = useAuth()
 
   const displayName = profile?.full_name || 'Tài khoản'
@@ -31,7 +33,7 @@ const Header = () => {
             <a href='/'>
               <div className='leading-none'>
                 <div className='text-[34px] font-bold tracking-tight'>
-                  i<span className='text-[#5dc4d4]'>VIVU</span>
+                  <span className='text-[#5dc4d4]'>StayFlow</span>
                 </div>
 
                 <div className='text-[22px] text-[#5dc4d4] text-right'>
@@ -45,37 +47,31 @@ const Header = () => {
           <nav className='h-full flex items-center gap-1'>
             <a
               href='/'
-              className='h-full flex items-center px-5 text-[22px] font-medium text-[#6ac2d4] border-b-[3px] border-[#ff9d1c]'
+              className={`h-full flex items-center px-5 text-[22px] font-medium transition ${
+                location.pathname === '/'
+                  ? 'text-[#6ac2d4] border-b-[3px] border-[#ff9d1c]'
+                  : 'text-white hover:text-[#6ac2d4]'
+              }`}
             >
               Khách sạn
             </a>
 
             <a
-              href='/tour'
-              className='h-full flex items-center px-5 text-[22px] font-medium hover:text-[#6ac2d4] transition'
+              href={path.rooms}
+              className={`h-full flex items-center px-5 text-[22px] font-medium transition ${
+                location.pathname === path.rooms || location.pathname === '/tour'
+                  ? 'text-[#6ac2d4] border-b-[3px] border-[#ff9d1c]'
+                  : 'text-white hover:text-[#6ac2d4]'
+              }`}
             >
-              Tour
+              Phòng
             </a>
 
             <a
               href='/flights'
               className='h-full flex items-center px-5 text-[22px] font-medium hover:text-[#6ac2d4] transition'
             >
-              Vé máy bay
-            </a>
-
-            <a
-              href='/entertainment'
-              className='h-full flex items-center px-5 text-[22px] font-medium hover:text-[#6ac2d4] transition'
-            >
-              Vé vui chơi
-            </a>
-
-            <a
-              href='/train'
-              className='h-full flex items-center px-5 text-[22px] font-medium hover:text-[#6ac2d4] transition'
-            >
-              Vé tàu
+              Khuyến mãi
             </a>
 
             <button

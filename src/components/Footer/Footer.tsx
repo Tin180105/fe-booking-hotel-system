@@ -5,7 +5,6 @@ import {
   FaTiktok,
   FaEnvelope,
   FaPhoneAlt,
-  FaMapMarkerAlt,
   FaApple,
   FaGooglePlay
 } from 'react-icons/fa'
@@ -20,10 +19,10 @@ const Footer = () => {
         {/* ================= TOP ================= */}
         <div className='grid grid-cols-1 lg:grid-cols-5 gap-8 border-b border-gray-300 pb-6'>
 
-          {/* VỀ iVIVU */}
+          {/* VỀ  */}
           <div>
             <h3 className='font-bold text-[18px] mb-2'>
-              Về iVIVU.com
+              Về StayFlow.com
             </h3>
 
             <ul className='space-y-2 text-[16px] text-gray-500'>
@@ -35,7 +34,7 @@ const Footer = () => {
 
               <li>
                 <a href='#' className='hover:text-[#e67e00]'>
-                  iVIVU Blog
+                  StayFlow Blog
                 </a>
               </li>
             </ul>
@@ -83,7 +82,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* TMC */}
+          {/* CMU */}
           <div>
             <h3 className='font-bold text-[18px] mb-2'>
               Thành viên của
@@ -91,7 +90,7 @@ const Footer = () => {
 
             <div className='mt-2'>
               <div className='text-[50px] leading-none font-bold text-[#193f69]'>
-                TMC
+                CMU
               </div>
 
               <div className='text-[12px] text-[#77a53b] text-center w-[140px]'>
@@ -131,12 +130,25 @@ const Footer = () => {
             {/* AWARDS */}
             <div className='grid grid-cols-1 md:grid-cols-3 gap-8 mb-6'>
 
-              <div className='flex items-center gap-4'>
-                <div className='text-[#c6a34a] text-[55px]'>
-                  🏆
+              <div className="flex items-center gap-4">
+                <div className="text-[#c6a34a]">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-[55px] h-[55px]"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
+                    />
+                  </svg>
                 </div>
 
-                <p className='font-semibold text-[17px] leading-6'>
+                <p className="font-semibold text-[17px] leading-6">
                   Đại lý Du lịch trực
                   <br />
                   tuyến hàng đầu
@@ -145,24 +157,49 @@ const Footer = () => {
                 </p>
               </div>
 
-              <div className='flex items-center gap-4'>
-                <div className='text-[45px]'>
-                  ♟️
+              <div className="flex items-center gap-4">
+                <div className="text-[#c6a34a]">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-[55px] h-[55px]"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"
+                    />
+                  </svg>
                 </div>
-
-                <p className='font-semibold text-[17px] leading-6'>
+                <p className="font-semibold text-[17px] leading-6">
                   Nơi làm việc tốt
                   <br />
                   nhất Châu Á
                 </p>
               </div>
 
-              <div className='flex items-center gap-4'>
-                <div className='text-[45px]'>
-                  🏆
+              <div className="flex items-center gap-4">
+                <div className="text-[#c6a34a]">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-[55px] h-[55px]"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"
+                    />
+                  </svg>
                 </div>
 
-                <p className='font-semibold text-[17px] leading-6'>
+                <p className="font-semibold text-[17px] leading-6">
                   Thương hiệu
                   <br />
                   truyền cảm hứng
@@ -170,47 +207,6 @@ const Footer = () => {
                   APEA
                 </p>
               </div>
-
-            </div>
-
-            {/* COMPANY INFO */}
-            <div className='space-y-3 text-[16px] text-[#4b5563]'>
-
-              <p>
-                ĐKKD: 0312788481, Ngày cấp: 21/05/2014, Sở kế hoạch đầu tư
-                thành phố Hồ Chí Minh
-              </p>
-
-              <div className='flex items-center gap-2'>
-                <FaMapMarkerAlt className='text-gray-500' />
-
-                <p>
-                  <strong>HCM:</strong> Tầng 2, Tòa nhà Anh Đăng, 215 Nam Kỳ
-                  Khởi Nghĩa, Phường Xuân Hòa, TP.Hồ Chí Minh
-                  <span className='text-gray-400'> (Xem bản đồ)</span>
-                </p>
-              </div>
-
-              <div className='flex items-center gap-2'>
-                <FaMapMarkerAlt className='text-gray-500' />
-
-                <p>
-                  <strong>HN:</strong> Tầng 8, Tòa nhà VietBank, 70-72 Bà Triệu,
-                  Phường Cửa Nam, Hà Nội
-                  <span className='text-gray-400'> (Xem bản đồ)</span>
-                </p>
-              </div>
-
-              <div className='flex items-center gap-2'>
-                <FaMapMarkerAlt className='text-gray-500' />
-
-                <p>
-                  <strong>Cần Thơ:</strong> Tầng 7 - Tòa nhà STS - 11B Đại Lộ
-                  Hòa Bình, Phường Ninh Kiều, TP.Cần Thơ
-                  <span className='text-gray-400'> (Xem bản đồ)</span>
-                </p>
-              </div>
-
             </div>
 
             {/* SOCIAL */}
@@ -289,17 +285,17 @@ const Footer = () => {
               </div>
 
               <span className='font-bold text-[22px] text-[#193f69]'>
-                iVIVU Viber
+                StayFlow Viber
               </span>
             </div>
 
             <p className='mt-4 text-[16px]'>
-              Tư vấn với Olivia - chatbot của iVIVU
+              Tư vấn với Olivia - chatbot của StayFlow
             </p>
 
             {/* APP */}
             <h3 className='font-bold text-[18px] mt-6'>
-              Quét mã QRcode để tải ứng dụng iVIVU ngay
+              Quét mã QRcode để tải ứng dụng StayFlow ngay
             </h3>
 
             <div className='flex items-center gap-4 mt-3'>

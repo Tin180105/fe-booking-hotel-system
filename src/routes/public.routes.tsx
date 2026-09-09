@@ -7,6 +7,8 @@ import Home from '../pages/Home'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
 import HotelDashboard from '../pages/HotelDashboard/HotelDashboard'
+import SearchResults from '../pages/SearchResults/SearchResults'
+import Rooms from '../pages/Rooms/Rooms'
 
 import path from '../constants/path'
 
@@ -14,9 +16,37 @@ const publicRoutes: RouteObject[] = [
   {
     element: <PublicLayout />,
     children: [
-      { path: path.home, element: <Home/> },
-      { path: path.login, element: <Login /> },
-      { path: path.register, element: <Register /> },
+      {
+        path: path.home,
+        element: <Home />
+      },
+
+      {
+        path: path.login,
+        element: <Login />
+      },
+
+      {
+        path: path.register,
+        element: <Register />
+      },
+
+      /* Trang tìm kiếm khách sạn */
+      {
+        path: path.search,
+        element: <SearchResults />
+      },
+
+      {
+        path: path.rooms,
+        element: <Rooms />
+      },
+
+      {
+        path: '/tour',
+        element: <Rooms />
+      },
+
       {
         path: path.hotelDashboard,
         element: (
