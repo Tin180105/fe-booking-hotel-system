@@ -343,19 +343,108 @@ useEffect(() => {
         </div>
       </div>
 
-            {/* ===== EDIT MODAL ===== */}
+      {/* ===== EDIT MODAL ===== */}
       {isFormOpen && editingUser && (
         <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4'>
           <div className='bg-white rounded-xl w-full max-w-[460px]'>
-            {/* ... header ... */}
+            <div className='flex items-center justify-between px-6 py-4 border-b border-slate-200'>
+              <h2 className='text-lg font-semibold text-slate-800'>Sửa thông tin người dùng</h2>
+              <button type='button' onClick={closeForm} className='text-slate-400 hover:text-slate-700'>
+                <MdClose size={22} />
+              </button>
+            </div>
+
             <form onSubmit={handleSubmit} className='px-6 py-5'>
-              {/* Họ tên */}
-              {/* Email */}
-              {/* Số điện thoại */}
-              {/* ❌ KHÔNG để Create Modal ở đây nữa */}
-              {/* Vai trò */}
-              {/* Khách sạn (nếu hotel) */}
-              {/* Hủy / Lưu thay đổi */}
+              {formError && (
+                <div className='mb-4 rounded-md bg-red-50 border border-red-200 px-4 py-2.5 text-red-600 text-sm'>
+                  {formError}
+                </div>
+              )}
+
+              <div className='mb-4'>
+                <label className='block text-sm font-medium text-slate-600 mb-1.5'>
+                  Họ tên <span className='text-red-500'>*</span>
+                </label>
+                <input
+                  type='text'
+                  value={form.full_name}
+                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                  className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
+                />
+              </div>
+
+              <div className='mb-4'>
+                <label className='block text-sm font-medium text-slate-600 mb-1.5'>
+                  Email <span className='text-red-500'>*</span>
+                </label>
+                <input
+                  type='email'
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
+                />
+              </div>
+
+              <div className='mb-6'>
+                <label className='block text-sm font-medium text-slate-600 mb-1.5'>Số điện thoại</label>
+                <input
+                  type='text'
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
+                />
+              </div>
+
+              <div className='mb-4'>
+                <label className='block text-sm font-medium text-slate-600 mb-1.5'>
+                  Vai trò <span className='text-red-500'>*</span>
+                </label>
+                <select
+                  value={form.role_code}
+                  onChange={(e) => setForm({ ...form, role_code: e.target.value, hotel_id: '' })}
+                  className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
+                >
+                  <option value=''>-- Chọn vai trò --</option>
+                  {roles.map((r) => (
+                    <option key={r.code} value={r.code}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {form.role_code === 'hotel' && (
+                <div className='mb-6'>
+                  <label className='block text-sm font-medium text-slate-600 mb-1.5'>
+                    Khách sạn <span className='text-red-500'>*</span>
+                  </label>
+                  <select
+                    value={form.hotel_id}
+                    onChange={(e) => setForm({ ...form, hotel_id: e.target.value })}
+                    className='w-full h-11 rounded-md border border-slate-300 px-3.5 text-sm outline-none focus:border-[#173f67]'
+                  >
+                    <option value=''>-- Chọn khách sạn --</option>
+                    {hotels.map((h) => (
+                      <option key={h.hotelId} value={h.hotelId}>{h.hotelName}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className='flex justify-end gap-3'>
+                <button
+                  type='button'
+                  onClick={closeForm}
+                  className='px-5 py-2.5 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50'
+                >
+                  Hủy
+                </button>
+                <button
+                  type='submit'
+                  disabled={submitting}
+                  className='px-5 py-2.5 rounded-md bg-[#0280ff] text-white font-semibold hover:bg-[#1612eb] disabled:opacity-60'
+                >
+                  {submitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

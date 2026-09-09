@@ -1,12 +1,10 @@
 import type { RouteObject } from 'react-router-dom'
 
 import PublicLayout from '../layouts/PublicLayout'
-import ProtectedRoute from '../components/ProtectedRoute'
 
 import Home from '../pages/Home'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
-import HotelDashboard from '../pages/HotelDashboard/HotelDashboard'
 import SearchResults from '../pages/SearchResults/SearchResults'
 import Rooms from '../pages/Rooms/Rooms'
 
@@ -45,15 +43,6 @@ const publicRoutes: RouteObject[] = [
       {
         path: '/tour',
         element: <Rooms />
-      },
-
-      {
-        path: path.hotelDashboard,
-        element: (
-          <ProtectedRoute allowedRoles={['hotel', 'admin']}>
-            <HotelDashboard />
-          </ProtectedRoute>
-        )
       }
     ]
   }

@@ -39,6 +39,10 @@ const hotelApi = {
 
   delete(id: number) {
     return http.delete<DeleteHotelResponse>(`${URL_HOTELS}/${id}`)
+  },
+
+  getMe() {
+  return http.get<HotelDetailResponse>('/hotels/me')
   }
 }
 
