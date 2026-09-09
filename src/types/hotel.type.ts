@@ -15,6 +15,19 @@ export interface HotelOverviewResponse {
   hotels: HotelOverview[]
 }
 
+export interface HotelHome {
+  id: number
+  name: string
+  city: string
+  description: string | null
+  starRating: number
+  imageUrl: string | null
+}
+
+export interface HotelHomeResponse {
+  hotels: HotelHome[]
+}
+
 export interface Hotel {
   id: number
   name: string
