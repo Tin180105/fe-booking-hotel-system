@@ -20,6 +20,8 @@ const path = {
 
   bookings: '/bookings',
   bookingDetail: '/bookings/:id',
+  promotions: '/promotions',
+  payment: '/payment',
 
   // =========================
   // ADMIN MANAGEMENT
