@@ -30,6 +30,7 @@ const path = {
   adminHotels: '/admin/hotels',
   adminBookings: '/admin/bookings',
   adminCustomers: '/admin/customers',
+  adminPromotions: '/admin/promotions',
   // =========================
   // HOTEL MANAGEMENT
   // =========================

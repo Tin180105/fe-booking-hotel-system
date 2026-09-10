@@ -9,7 +9,7 @@ import {
   MdMenu,
   MdClose
 } from 'react-icons/md'
-
+import { MdLocalOffer } from 'react-icons/md'
 import { useAuth } from '../../contexts/app.context'
 import path from '../../constants/path'
 import { MdPersonOutline } from 'react-icons/md'
@@ -20,7 +20,8 @@ const menuItems = [
   { label: 'Người dùng', icon: MdPeople, to: path.adminUsers },
   { label: 'Khách sạn', icon: MdHotel, to: path.adminHotels },
   { label: 'Đặt phòng', icon: MdBookOnline, to: path.adminBookings },
-  { label: 'Khách hàng', icon: MdPersonOutline, to: path.adminCustomers }
+  { label: 'Khách hàng', icon: MdPersonOutline, to: path.adminCustomers },
+  { label: 'Mã giảm giá', icon: MdLocalOffer, to: path.adminPromotions }
 ]
 
 const AdminLayout = () => {
