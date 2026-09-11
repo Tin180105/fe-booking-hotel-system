@@ -68,8 +68,12 @@ const Header = () => {
             </a>
 
             <a
-              href='/flights'
-              className='h-full flex items-center px-5 text-[22px] font-medium hover:text-[#6ac2d4] transition'
+              href={path.promotions}
+              className={`h-full flex items-center px-5 text-[22px] font-medium transition ${
+                location.pathname === path.promotions
+                  ? 'text-[#6ac2d4] border-b-[3px] border-[#ff9d1c]'
+                  : 'text-white hover:text-[#6ac2d4]'
+              }`}
             >
               Khuyến mãi
             </a>

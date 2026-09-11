@@ -202,12 +202,15 @@ useEffect(() => {
   }, [filters, roomsData, sort])
 
   const handleSelectRoom = (room: Room) => {
-    navigate(`/rooms/${room.id}`, {
+    navigate('/payment', {
       state: {
-        room,
         hotelId: state?.hotelId,
         hotelName,
         destination,
+        roomTypeId: room.id,
+        roomName: room.name,
+        imageUrl: room.image,
+        price: room.price,
         checkIn: state?.checkIn,
         checkOut: state?.checkOut,
         rooms: state?.rooms,
