@@ -46,7 +46,13 @@ const roomApi = {
   },
   delete(id: number) {
     return http.delete<{ success: boolean }>(`/roomTypes/${id}`)
-  }
+  },
+  getAvailability(id: number, checkIn: string, checkOut: string) {
+    return http.get<{ success: boolean; data: { total_rooms: number; booked: number; available: number } }>(
+        `/roomTypes/${id}/availability`,
+        { params: { checkIn, checkOut } }
+    )
+  },
   
 }
 

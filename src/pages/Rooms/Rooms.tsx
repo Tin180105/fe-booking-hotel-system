@@ -88,7 +88,7 @@ const Rooms = () => {
       : `http://localhost:5000/uploads${normalizedPath}`
   }
 
-  useEffect(() => {
+useEffect(() => {
     const fetchRooms = async () => {
       setLoading(true)
       setError('')
@@ -98,21 +98,51 @@ const Rooms = () => {
           ? await roomApi.getByHotelId(state.hotelId)
           : await roomApi.getAll()
         const roomTypes = response.data.data ?? []
-        const rooms = roomTypes.map((roomType: RoomType) => ({
-          id: roomType.id,
-          hotelName: roomType.hotel_name,
-          name: roomType.name,
-          image: getRoomImageUrl(roomType.thumbnail_url),
-          price: Number(roomType.base_price),
-          size: undefined,
-          guests: roomType.capacity,
-          bed: 'Chưa cập nhật thông tin giường',
-          available: roomType.total_rooms,
-          description: roomType.description || 'Chưa có mô tả cho loại phòng này.',
-          amenities: [],
-          breakfast: false,
-          cancellation: undefined
-        }))
+
+        const hasDateRange = Boolean(state?.checkIn && state?.checkOut)
+
+        // Nếu có ngày nhận/trả phòng cụ thể -> lấy số phòng còn trống thực tế
+        const availabilityMap = new Map<number, number>()
+
+        if (hasDateRange) {
+          const results = await Promise.allSettled(
+            roomTypes.map((roomType: RoomType) =>
+              roomApi.getAvailability(
+                roomType.id,
+                state!.checkIn as string,
+                state!.checkOut as string
+              )
+            )
+          )
+
+          results.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+              const roomTypeId = roomTypes[index].id
+              availabilityMap.set(roomTypeId, result.value.data.data.available)
+            }
+          })
+        }
+
+        const rooms = roomTypes.map((roomType: RoomType) => {
+          const availableFromApi = availabilityMap.get(roomType.id)
+
+          return {
+            id: roomType.id,
+            hotelName: roomType.hotel_name,
+            name: roomType.name,
+            image: getRoomImageUrl(roomType.thumbnail_url),
+            price: Number(roomType.base_price),
+            size: undefined,
+            guests: roomType.capacity,
+            bed: 'Chưa cập nhật thông tin giường',
+            // Ưu tiên số phòng còn trống theo ngày đã chọn, fallback về total_rooms nếu chưa có ngày
+            available: availableFromApi !== undefined ? Math.max(availableFromApi, 0) : roomType.total_rooms,
+            description: roomType.description || 'Chưa có mô tả cho loại phòng này.',
+            amenities: [],
+            breakfast: false,
+            cancellation: undefined
+          }
+        })
 
         setRoomsData(rooms)
       } catch (fetchError) {
@@ -125,7 +155,7 @@ const Rooms = () => {
     }
 
     fetchRooms()
-  }, [state?.hotelId])
+  }, [state?.hotelId, state?.checkIn, state?.checkOut])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN').format(price)
