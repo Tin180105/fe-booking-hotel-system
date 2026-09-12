@@ -9,6 +9,15 @@ export interface Amenity {
 const amenityApi = {
   getAll() {
     return http.get<{ success: boolean; data: Amenity[] }>('/amenities')
+  },
+  create(body: { name: string; icon_code?: string }) {
+    return http.post<{ success: boolean; data: Amenity }>('/amenities', body)
+  },
+  update(id: number, body: { name: string; icon_code?: string }) {
+    return http.put<{ success: boolean; data: Amenity }>(`/amenities/${id}`, body)
+  },
+  delete(id: number) {
+    return http.delete<{ success: boolean }>(`/amenities/${id}`)
   }
 }
 

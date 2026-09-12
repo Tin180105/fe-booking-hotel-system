@@ -19,7 +19,7 @@ const menuItems = [
   { label: 'Loại phòng', icon: MdMeetingRoom, to: path.hotelRooms },
   { label: 'Tiện nghi', icon: MdCategory, to: path.hotelAmenities },
   { label: 'Đặt phòng', icon: MdBookOnline, to: path.hotelBookings },
-  { label: 'Chi trả', icon: MdPayments, to: path.hotelPayouts }  // thêm dòng này
+  { label: 'Chi trả', icon: MdPayments, to: path.hotelPayouts }
 ]
 
 const HotelLayout = () => {
