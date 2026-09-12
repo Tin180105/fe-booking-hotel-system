@@ -6,6 +6,7 @@ import HotelDashboard from '../pages/HotelDashboard'
 import HotelRoomTypes from '../pages/HotelRoomTypes'
 import HotelAmenities from '../pages/HotelAmenities'
 import HotelBookings from '../pages/HotelBookings'
+import HotelPayouts from '../pages/HotelPayouts'
 
 const hotelRoutes: RouteObject[] = [
   {
@@ -19,7 +20,8 @@ const hotelRoutes: RouteObject[] = [
       { path: 'dashboard', element: <HotelDashboard /> },
       { path: 'rooms', element: <HotelRoomTypes /> },
       { path: 'amenities', element: <HotelAmenities /> },
-      { path: 'bookings', element: <HotelBookings /> }
+      { path: 'bookings', element: <HotelBookings /> },
+      { path: 'payouts', element: <HotelPayouts /> }
     ]
   }
 ]

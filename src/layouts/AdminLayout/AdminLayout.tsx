@@ -7,7 +7,8 @@ import {
   MdBookOnline,
   MdLogout,
   MdMenu,
-  MdClose
+  MdClose,
+  MdPayments
 } from 'react-icons/md'
 import { MdLocalOffer } from 'react-icons/md'
 import { useAuth } from '../../contexts/app.context'
@@ -21,7 +22,8 @@ const menuItems = [
   { label: 'Khách sạn', icon: MdHotel, to: path.adminHotels },
   { label: 'Đặt phòng', icon: MdBookOnline, to: path.adminBookings },
   { label: 'Khách hàng', icon: MdPersonOutline, to: path.adminCustomers },
-  { label: 'Mã giảm giá', icon: MdLocalOffer, to: path.adminPromotions }
+  { label: 'Mã giảm giá', icon: MdLocalOffer, to: path.adminPromotions },
+  { label: 'Chi trả', icon: MdPayments, to: path.adminPayouts }  // thêm dòng này
 ]
 
 const AdminLayout = () => {

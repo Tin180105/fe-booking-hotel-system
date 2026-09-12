@@ -33,6 +33,7 @@ const path = {
   adminBookings: '/admin/bookings',
   adminCustomers: '/admin/customers',
   adminPromotions: '/admin/promotions',
+  adminPayouts: '/admin/payouts',
   // =========================
   // HOTEL MANAGEMENT
   // =========================
@@ -42,6 +43,7 @@ const path = {
   hotelRooms: '/hotel/rooms',
   hotelBookings: '/hotel/bookings',
   hotelAmenities: '/hotel/amenities',
+  hotelPayouts: '/hotel/payouts',
   search: '/search',
 
   // =========================

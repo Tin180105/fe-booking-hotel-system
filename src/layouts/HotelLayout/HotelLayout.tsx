@@ -7,7 +7,8 @@ import {
   MdBookOnline,
   MdLogout,
   MdMenu,
-  MdClose
+  MdClose,
+  MdPayments
 } from 'react-icons/md'
 
 import { useAuth } from '../../contexts/app.context'
@@ -17,7 +18,8 @@ const menuItems = [
   { label: 'Tổng quan', icon: MdDashboard, to: path.hotelDashboard },
   { label: 'Loại phòng', icon: MdMeetingRoom, to: path.hotelRooms },
   { label: 'Tiện nghi', icon: MdCategory, to: path.hotelAmenities },
-  { label: 'Đặt phòng', icon: MdBookOnline, to: path.hotelBookings }
+  { label: 'Đặt phòng', icon: MdBookOnline, to: path.hotelBookings },
+  { label: 'Chi trả', icon: MdPayments, to: path.hotelPayouts }  // thêm dòng này
 ]
 
 const HotelLayout = () => {

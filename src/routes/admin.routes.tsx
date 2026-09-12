@@ -8,6 +8,7 @@ import AdminHotels from '../pages/AdminHotels'
 import AdminUsers from '../pages/AdminUsers'
 import AdminBookings from '../pages/AdminBookings'
 import AdminPromotions from '../pages/AdminPromotions'
+import AdminPayouts from '../pages/AdminPayouts'
 
 
 const adminRoutes: RouteObject[] = [
@@ -24,7 +25,8 @@ const adminRoutes: RouteObject[] = [
       { path: 'users', element: <AdminUsers /> },
       { path: 'customers', element: <AdminCustomers /> },
       { path: 'bookings', element: <AdminBookings /> },
-      { path: 'promotions', element: <AdminPromotions /> }
+      { path: 'promotions', element: <AdminPromotions /> },
+      { path: 'payouts', element: <AdminPayouts /> }
     ]
   }
 ]
