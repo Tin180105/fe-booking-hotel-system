@@ -9,8 +9,7 @@ import SearchResults from '../pages/SearchResults/SearchResults'
 import Rooms from '../pages/Rooms/Rooms'
 import Promotions from '../pages/Promotions'
 import Payment from '../pages/Payment'
-import HotelDashboard from '../pages/HotelDashboard/HotelDashboard'
-import ProtectedRoute from '../components/ProtectedRoute'
+
 import path from '../constants/path'
 
 const publicRoutes: RouteObject[] = [
@@ -53,14 +52,6 @@ const publicRoutes: RouteObject[] = [
         element: <Payment />
       },
 
-      {
-        path: path.hotelDashboard,
-        element: (
-          <ProtectedRoute allowedRoles={['hotel', 'admin']}>
-            <HotelDashboard />
-          </ProtectedRoute>
-        )
-      }
     ]
   }
 ]
