@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import axios from 'axios'
 import {
   FiCalendar,
   FiMapPin,
@@ -7,6 +8,8 @@ import {
   FiClock,
   FiXCircle
 } from 'react-icons/fi'
+import bookingApi, { type BookingOverviewRow } from '../../apis/booking.api'
+import { useAuth } from '../../contexts/app.context'
 
 interface Booking {
   id: number
@@ -24,59 +27,73 @@ interface Booking {
   statusText: string
 }
 
-const bookings: Booking[] = [
-  {
-    id: 1,
-    bookingCode: 'SF20260910001',
-    hotelName: 'Vinpearl Landmark 81',
-    hotelAddress: '720A Điện Biên Phủ, Bình Thạnh, TP. Hồ Chí Minh',
-    roomName: 'Deluxe King Room',
-    image:
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=900',
-    checkIn: '20/09/2026',
-    checkOut: '23/09/2026',
-    rooms: 1,
-    guests: 2,
-    totalPrice: 4500000,
-    status: 'upcoming',
-    statusText: 'Sắp tới'
-  },
-  {
-    id: 2,
-    bookingCode: 'SF20260815002',
-    hotelName: 'InterContinental Danang',
-    hotelAddress: 'Bãi Bắc, Sơn Trà, Đà Nẵng',
-    roomName: 'Superior Ocean View',
-    image:
-      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=900',
-    checkIn: '15/08/2026',
-    checkOut: '18/08/2026',
-    rooms: 1,
-    guests: 2,
-    totalPrice: 6200000,
-    status: 'completed',
-    statusText: 'Đã hoàn thành'
-  },
-  {
-    id: 3,
-    bookingCode: 'SF20260712003',
-    hotelName: 'Novotel Nha Trang',
-    hotelAddress: '50 Trần Phú, Nha Trang, Khánh Hòa',
-    roomName: 'Standard Room',
-    image:
-      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=900',
-    checkIn: '12/07/2026',
-    checkOut: '14/07/2026',
-    rooms: 1,
-    guests: 2,
-    totalPrice: 2800000,
-    status: 'cancelled',
-    statusText: 'Đã hủy'
-  }
-]
+const getBookingStatus = (status: string): Booking['status'] => {
+  if (status === 'CANCELLED') return 'cancelled'
+  if (status === 'COMPLETED') return 'completed'
+  return 'upcoming'
+}
+
+const getBookingStatusText = (status: string) => {
+  if (status === 'CANCELLED') return 'Đã hủy'
+  if (status === 'COMPLETED') return 'Đã hoàn thành'
+  return 'Sắp tới'
+}
 
 const Bookings = () => {
+  const { profile } = useAuth()
   const [activeTab, setActiveTab] = useState('all')
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (!profile?.id) return
+
+      try {
+        setLoading(true)
+        setError('')
+
+        const response = await bookingApi.getOverview()
+        const customerRows = response.data.data.filter((row) => row.customer_id === profile.id)
+        const groupedBookings = new Map<number, BookingOverviewRow>()
+
+        customerRows.forEach((row) => {
+          if (!groupedBookings.has(row.booking_id)) {
+            groupedBookings.set(row.booking_id, row)
+          }
+        })
+
+        setBookings(
+          Array.from(groupedBookings.values()).map((row) => ({
+            id: row.booking_id,
+            bookingCode: row.booking_code,
+            hotelName: row.hotel_name,
+            hotelAddress: `${row.hotel_address}, ${row.hotel_city}`,
+            roomName: row.room_type_name,
+            image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=900',
+            checkIn: new Date(row.expected_check_in).toLocaleDateString('vi-VN'),
+            checkOut: new Date(row.expected_check_out).toLocaleDateString('vi-VN'),
+            rooms: row.room_quantity,
+            guests: row.room_capacity,
+            totalPrice: row.final_amount,
+            status: getBookingStatus(row.booking_status),
+            statusText: getBookingStatusText(row.booking_status)
+          }))
+        )
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err)) {
+          setError(err.response?.data?.message || 'Không thể tải danh sách đặt phòng')
+        } else {
+          setError('Đã xảy ra lỗi không xác định')
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBookings()
+  }, [profile?.id])
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('vi-VN') + 'đ'
@@ -106,6 +123,18 @@ const Bookings = () => {
       </section>
 
       <main className='max-w-6xl mx-auto px-6 py-8'>
+
+        {error && (
+          <div className='mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-600'>
+            {error}
+          </div>
+        )}
+
+        {loading && (
+          <div className='mb-6 rounded-2xl bg-white p-12 text-center shadow-sm text-gray-500'>
+            Đang tải danh sách đặt phòng...
+          </div>
+        )}
 
         {/* Tabs */}
         <div className='bg-white rounded-xl shadow-sm p-2 inline-flex gap-1 mb-6'>
@@ -159,7 +188,7 @@ const Bookings = () => {
         {/* Booking list */}
         <div className='space-y-5'>
 
-          {filteredBookings.map((booking) => (
+          {!loading && filteredBookings.map((booking) => (
 
             <div
               key={booking.id}
