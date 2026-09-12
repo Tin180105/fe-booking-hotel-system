@@ -387,9 +387,7 @@ const Bookings = () => {
                       Xem chi tiết
                       <FiChevronRight />
                     </button>
-
                   </div>
-
                 </div>
 
               </div>
