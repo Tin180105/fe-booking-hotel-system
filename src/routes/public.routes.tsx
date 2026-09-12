@@ -11,6 +11,7 @@ import SearchResults from '../pages/SearchResults/SearchResults'
 import Rooms from '../pages/Rooms/Rooms'
 import Promotions from '../pages/Promotions'
 import Payment from '../pages/Payment'
+import Bookings from '../pages/Bookings/Bookings'
 
 import path from '../constants/path'
 
@@ -52,6 +53,11 @@ const publicRoutes: RouteObject[] = [
       {
         path: '/payment',
         element: <Payment />
+      },
+
+      {
+        path: path.bookings,
+        element: <Bookings />
       },
 
       {
