@@ -9,6 +9,7 @@ import SearchResults from '../pages/SearchResults/SearchResults'
 import Rooms from '../pages/Rooms/Rooms'
 import Promotions from '../pages/Promotions'
 import Payment from '../pages/Payment'
+import Bookings from '../pages/Bookings/Bookings'
 
 import path from '../constants/path'
 
@@ -43,22 +44,20 @@ const publicRoutes: RouteObject[] = [
       },
 
       { 
-        path: path.promotions,
+        path: '/promotions',
         element: <Promotions />
       },
 
       {
-        path: path.payment,
+        path: '/payment',
         element: <Payment />
       },
 
-<<<<<<< HEAD
-=======
       {
-        path: path.bookings,
+        path: '/bookings',
         element: <Bookings />
       },
->>>>>>> 4b2519013d02ee04ad60dd3a792fd0953cb2be92
+
     ]
   }
 ]
