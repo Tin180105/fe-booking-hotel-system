@@ -43,15 +43,22 @@ const publicRoutes: RouteObject[] = [
       },
 
       { 
-        path: '/promotions',
+        path: path.promotions,
         element: <Promotions />
       },
 
       {
-        path: '/payment',
+        path: path.payment,
         element: <Payment />
       },
 
+<<<<<<< HEAD
+=======
+      {
+        path: path.bookings,
+        element: <Bookings />
+      },
+>>>>>>> 4b2519013d02ee04ad60dd3a792fd0953cb2be92
     ]
   }
 ]
