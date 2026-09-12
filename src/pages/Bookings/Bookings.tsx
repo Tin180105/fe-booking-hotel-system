@@ -45,6 +45,7 @@ const Bookings = () => {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [cancellingId, setCancellingId] = useState<number | null>(null)
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -97,6 +98,33 @@ const Bookings = () => {
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('vi-VN') + 'đ'
+  }
+
+  const handleCancel = async (booking: Booking) => {
+    const confirmed = window.confirm(`Bạn có chắc muốn hủy booking "${booking.bookingCode}"?`)
+
+    if (!confirmed) return
+
+    try {
+      setCancellingId(booking.id)
+      setError('')
+      await bookingApi.updateStatus(booking.id, 'CANCELLED')
+      setBookings((current) =>
+        current.map((item) =>
+          item.id === booking.id
+            ? { ...item, status: 'cancelled', statusText: 'Đã hủy' }
+            : item
+        )
+      )
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Không thể hủy đặt phòng')
+      } else {
+        setError('Đã xảy ra lỗi không xác định')
+      }
+    } finally {
+      setCancellingId(null)
+    }
   }
 
   const filteredBookings = bookings.filter((booking) => {
@@ -345,8 +373,13 @@ const Bookings = () => {
                   <div className='flex gap-3'>
 
                     {booking.status === 'upcoming' && (
-                      <button className='border border-red-200 text-red-500 px-5 py-2.5 rounded-lg font-semibold hover:bg-red-50 transition'>
-                        Hủy đặt phòng
+                      <button
+                        type='button'
+                        onClick={() => handleCancel(booking)}
+                        disabled={cancellingId === booking.id}
+                        className='border border-red-200 text-red-500 px-5 py-2.5 rounded-lg font-semibold hover:bg-red-50 transition disabled:cursor-not-allowed disabled:opacity-60'
+                      >
+                        {cancellingId === booking.id ? 'Đang hủy...' : 'Hủy đặt phòng'}
                       </button>
                     )}
 
