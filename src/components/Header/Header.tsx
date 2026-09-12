@@ -8,7 +8,6 @@ import {
 
 import { useLocation, useNavigate } from 'react-router-dom'
 import { FiChevronDown } from 'react-icons/fi'
-import { HiOutlineDotsHorizontal } from 'react-icons/hi'
 
 import { useAuth } from '../../contexts/app.context'
 import path from '../../constants/path'
@@ -80,9 +79,14 @@ const Header = () => {
 
             <button
               type='button'
-              className='px-5 hover:text-[#6ac2d4]'
+              onClick={() => navigate(path.bookings)}
+              className={`h-full px-5 text-[22px] font-medium transition ${
+                location.pathname === path.bookings
+                  ? 'text-[#6ac2d4] border-b-[3px] border-[#ff9d1c]'
+                  : 'text-white hover:text-[#6ac2d4]'
+              }`}
             >
-              <HiOutlineDotsHorizontal size={28} />
+              Vé đã đặt
             </button>
           </nav>
         </div>
