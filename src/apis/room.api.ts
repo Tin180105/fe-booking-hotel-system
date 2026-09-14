@@ -38,6 +38,10 @@ const roomApi = {
     )
   },
 
+  getById(id: number) {
+    return http.get<ApiResponse<RoomType>>(`/roomTypes/${id}`)
+  },
+
   create(body: CreateRoomTypePayload) {
     return http.post<ApiResponse<RoomType>>('/roomTypes', body)
   },

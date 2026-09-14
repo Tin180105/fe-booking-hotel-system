@@ -10,7 +10,8 @@ import {
   FiCreditCard,
   FiShield,
   FiCheck,
-  FiTag
+  FiTag,
+  FiXCircle
 } from 'react-icons/fi'
 import bookingApi from '../../apis/booking.api'
 import paymentApi from '../../apis/payment.api'
@@ -31,6 +32,10 @@ interface PaymentState {
   adults?: number
   children?: number
   price?: number
+  bookingId?: number
+  bookingCode?: string
+  bookingStatus?: string
+  finalAmount?: number
 }
 
 const Payment = () => {
@@ -47,6 +52,10 @@ const Payment = () => {
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null)
   const [isApplyingPromo, setIsApplyingPromo] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [bookingId, setBookingId] = useState<number | null>(state.bookingId ?? null)
+  const [bookingCode, setBookingCode] = useState(state.bookingCode || '')
+  const [bookingStatus, setBookingStatus] = useState<string | null>(state.bookingStatus || null)
+  const [isCancelling, setIsCancelling] = useState(false)
   const [error, setError] = useState('')
 
   const [customer, setCustomer] = useState({
@@ -119,7 +128,7 @@ const Payment = () => {
   const nights = calculateNights()
 
   const applyPromotion = (promotion: Promotion) => {
-    const rawDiscount = promotion.discount_type === 'PERCENT'
+    const rawDiscount = promotion.discount_type === 'PERCENTAGE'
       ? totalRoomPrice * Number(promotion.discount_value) / 100
       : Number(promotion.discount_value)
     const cappedDiscount = promotion.max_discount === null
@@ -171,28 +180,42 @@ const Payment = () => {
     setError('')
 
     try {
-      const bookingResponse = await bookingApi.create({
-        hotel_id: state.hotelId,
-        customer_id: profile.id,
-        room_type_id: state.roomTypeId,
-        quantity: roomQuantity,
-        check_in: state.checkIn,
-        check_out: state.checkOut,
-        promotion_id: selectedPromotion?.id ?? null
-      })
+      let paymentBookingId = bookingId
+      let paymentAmount = Number(state.finalAmount ?? 0)
+
+      if (!paymentBookingId) {
+        const bookingResponse = await bookingApi.create({
+          hotel_id: state.hotelId,
+          customer_id: profile.id,
+          room_type_id: state.roomTypeId,
+          quantity: roomQuantity,
+          check_in: state.checkIn,
+          check_out: state.checkOut,
+          promotion_id: selectedPromotion?.id ?? null
+        })
+
+        const createdBooking = bookingResponse.data.data
+        paymentBookingId = createdBooking.booking_id
+        paymentAmount = Number(createdBooking.final_amount)
+        setBookingId(createdBooking.booking_id)
+        setBookingCode(createdBooking.booking_code)
+        setBookingStatus(createdBooking.status)
+      }
 
       const paymentResponse = await paymentApi.create({
-        booking_id: bookingResponse.data.data.booking_id,
+        booking_id: paymentBookingId,
         payment_method: paymentMethod,
-        amount: Number(bookingResponse.data.data.final_amount)
+        amount: paymentAmount
       })
 
       if (paymentResponse.data.data.payment_status !== 'SUCCESS') {
+        setBookingStatus('PENDING')
         setError('Thanh toán chưa thành công. Vui lòng kiểm tra lại thông tin.')
         return
       }
 
-      alert(`Đặt phòng thành công! Mã đặt phòng: ${bookingResponse.data.data.booking_code}`)
+      setBookingStatus('CONFIRMED')
+      alert(`Đặt phòng thành công! Mã đặt phòng: ${bookingCode}`)
       navigate('/')
     } catch (requestError: unknown) {
       const responseMessage = axios.isAxiosError(requestError)
@@ -208,6 +231,42 @@ const Payment = () => {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleCancelPayment = async () => {
+    if (!bookingId) {
+      navigate(-1)
+      return
+    }
+
+    if (bookingStatus !== 'PENDING') return
+
+    if (!window.confirm(`Bạn có chắc muốn hủy thanh toán cho booking "${bookingCode}"?`)) {
+      return
+    }
+
+    try {
+      setIsCancelling(true)
+      setError('')
+      const response = await bookingApi.updateStatus(bookingId, 'CANCELLED')
+      setBookingStatus(response.data.data?.status || 'CANCELLED')
+    } catch (requestError: unknown) {
+      const responseMessage = axios.isAxiosError(requestError)
+        ? requestError.response?.data?.message
+        : requestError instanceof Error
+          ? requestError.message
+          : ''
+
+      setError(responseMessage || 'Không thể hủy thanh toán. Vui lòng thử lại.')
+    } finally {
+      setIsCancelling(false)
+    }
+  }
+
+  const bookingStatusText: Record<string, string> = {
+    PENDING: 'Đang chờ thanh toán',
+    CONFIRMED: 'Đã xác nhận',
+    CANCELLED: 'Đã hủy'
   }
 
   return (
@@ -657,7 +716,7 @@ const Payment = () => {
                         </option>
                         {savedPromotions.map((promotion) => (
                           <option key={promotion.id} value={promotion.code}>
-                            {promotion.code} - {promotion.discount_type === 'PERCENT'
+                            {promotion.code} - {promotion.discount_type === 'PERCENTAGE'
                               ? `${promotion.discount_value}%`
                               : formatPrice(Number(promotion.discount_value))}
                           </option>
@@ -724,14 +783,36 @@ const Payment = () => {
 
                 </div>
 
-                {/* Payment button */}
-                <button
-                  onClick={handlePayment}
-                  disabled={isSubmitting}
-                  className='w-full mt-6 bg-[#ff9d1c] hover:bg-[#f18d0b] text-white font-bold py-4 rounded-xl transition shadow-sm'
-                >
-                  {isSubmitting ? 'Đang xử lý...' : 'Thanh toán ngay'}
-                </button>
+                <div className='mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  <button
+                    type='button'
+                    onClick={handleCancelPayment}
+                    disabled={isSubmitting || isCancelling || bookingStatus === 'CANCELLED'}
+                    className='inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 py-4 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50'
+                  >
+                    <FiXCircle />
+                    {isCancelling ? 'Đang hủy...' : 'Hủy thanh toán'}
+                  </button>
+
+                  <button
+                    type='button'
+                    onClick={handlePayment}
+                    disabled={isSubmitting || bookingStatus === 'CANCELLED'}
+                    className='inline-flex items-center justify-center rounded-xl bg-[#ff9d1c] py-4 font-bold text-white shadow-sm transition hover:bg-[#f18d0b] disabled:cursor-not-allowed disabled:opacity-50'
+                  >
+                    {isSubmitting ? 'Đang xử lý...' : 'Thanh toán'}
+                  </button>
+                </div>
+
+                {bookingStatus && (
+                  <div className='mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-[#173f67]'>
+                    <div className='flex items-center justify-between gap-3'>
+                      <span>
+                        Trạng thái booking: <strong>{bookingStatusText[bookingStatus] || bookingStatus}</strong>
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {error && (
                   <p className='text-red-500 text-sm mt-3'>{error}</p>

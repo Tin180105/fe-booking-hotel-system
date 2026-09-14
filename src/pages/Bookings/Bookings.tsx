@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import {
   FiCalendar,
@@ -40,6 +41,7 @@ const getBookingStatusText = (status: string) => {
 }
 
 const Bookings = () => {
+  const navigate = useNavigate()
   const { profile } = useAuth()
   const [activeTab, setActiveTab] = useState('all')
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -383,11 +385,15 @@ const Bookings = () => {
                       </button>
                     )}
 
-                    <button className='flex items-center gap-2 bg-[#173f67] text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-[#123452] transition'>
+                    <button
+                      type='button'
+                      onClick={() => navigate(`/bookings/${booking.id}`)}
+                      className='flex items-center gap-2 bg-[#173f67] text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-[#123452] transition'
+                    >
                       Xem chi tiết
                       <FiChevronRight />
                     </button>
-                  </div>
+                  </div>``
                 </div>
 
               </div>

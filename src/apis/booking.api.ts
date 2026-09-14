@@ -100,7 +100,14 @@ const bookingApi = {
 
   // Đổi trạng thái nhanh
   updateStatus(id: number, status: string) {
-    return http.patch<{ success: true; data: unknown }>(`/bookings/${id}/status`, { status })
+    return http.patch<{
+      success: true
+      data: {
+        id: number
+        status: string
+        updated_at: string
+      }
+    }>(`/bookings/${id}/status`, { status })
   },
 
   // Xóa booking

@@ -15,6 +15,7 @@ import roomApi, { type RoomType } from '../../apis/room.api'
 
 interface Room {
   id: number
+  hotelId: number
   hotelName: string
   name: string
   image: string
@@ -128,6 +129,7 @@ useEffect(() => {
 
           return {
             id: roomType.id,
+            hotelId: roomType.hotel_id,
             hotelName: roomType.hotel_name,
             name: roomType.name,
             image: getRoomImageUrl(roomType.thumbnail_url),
@@ -155,7 +157,7 @@ useEffect(() => {
     }
 
     fetchRooms()
-  }, [state?.hotelId, state?.checkIn, state?.checkOut])
+  }, [state])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN').format(price)
@@ -202,15 +204,17 @@ useEffect(() => {
   }, [filters, roomsData, sort])
 
   const handleSelectRoom = (room: Room) => {
-    navigate('/payment', {
+    navigate('/room-confirmation', {
       state: {
-        hotelId: state?.hotelId,
+        hotelId: state?.hotelId || room.hotelId,
         hotelName,
         destination,
         roomTypeId: room.id,
         roomName: room.name,
         imageUrl: room.image,
         price: room.price,
+        capacity: room.guests,
+        availableRooms: room.available,
         checkIn: state?.checkIn,
         checkOut: state?.checkOut,
         rooms: state?.rooms,
