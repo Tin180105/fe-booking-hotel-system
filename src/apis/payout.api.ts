@@ -60,7 +60,11 @@ const payoutApi = {
   // ADMIN: xoá
   delete(id: number) {
     return http.delete<ApiResponse<null>>(`${URL_PAYOUTS}/${id}`)
-  }
+  },
+  
+  confirmReceived(id: number) {
+  return http.patch<ApiResponse<Payout>>(`${URL_PAYOUTS}/${id}/confirm-received`)
+}
 }
 
 export default payoutApi

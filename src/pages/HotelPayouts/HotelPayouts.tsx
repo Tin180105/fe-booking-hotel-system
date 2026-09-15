@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/app.context'
 const statusLabel: Record<string, { text: string; className: string }> = {
   PENDING: { text: 'Chờ chi trả', className: 'bg-amber-50 text-amber-600' },
   PAID: { text: 'Đã chi trả', className: 'bg-emerald-50 text-emerald-600' },
+  CONFIRMED: { text: 'Đã xác nhận nhận tiền', className: 'bg-teal-50 text-teal-600' },
   CANCELLED: { text: 'Đã hủy', className: 'bg-red-50 text-red-600' }
 }
 
@@ -20,6 +21,7 @@ const HotelPayouts = () => {
   const [payouts, setPayouts] = useState<Payout[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [confirmingId, setConfirmingId] = useState<number | null>(null)
 
   const fetchPayouts = async () => {
     if (!hotelId) return
@@ -43,8 +45,32 @@ const HotelPayouts = () => {
     fetchPayouts()
   }, [hotelId])
 
+  const handleConfirmReceived = async (payout: Payout) => {
+    const confirmed = window.confirm(
+      `Xác nhận đã nhận đủ tiền payout "${payout.payout_code}" (${formatMoney(payout.payout_amount)})?`
+    )
+    if (!confirmed) return
+
+    try {
+      setConfirmingId(payout.id)
+      setError('')
+      await payoutApi.confirmReceived(payout.id)
+      setPayouts((prev) =>
+        prev.map((p) => (p.id === payout.id ? { ...p, status: 'CONFIRMED' } : p))
+      )
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Không thể xác nhận nhận tiền')
+      } else {
+        setError('Đã xảy ra lỗi không xác định')
+      }
+    } finally {
+      setConfirmingId(null)
+    }
+  }
+
   const totalReceived = payouts
-    .filter((p) => p.status === 'PAID')
+    .filter((p) => p.status === 'PAID' || p.status === 'CONFIRMED')
     .reduce((sum, p) => sum + Number(p.payout_amount || 0), 0)
 
   return (
@@ -75,15 +101,26 @@ const HotelPayouts = () => {
                 <th className='px-6 py-3 font-medium'>Số tiền nhận</th>
                 <th className='px-6 py-3 font-medium'>Trạng thái</th>
                 <th className='px-6 py-3 font-medium'>Ngày tạo</th>
+                <th className='px-6 py-3 font-medium'>Thao tác</th>
               </tr>
             </thead>
             <tbody className='divide-y divide-slate-100'>
               {loading && (
-                <tr><td colSpan={6} className='px-6 py-6 text-center text-slate-400'>Đang tải dữ liệu...</td></tr>
+                <tr>
+                  <td colSpan={7} className='px-6 py-6 text-center text-slate-400'>
+                    Đang tải dữ liệu...
+                  </td>
+                </tr>
               )}
+
               {!loading && payouts.length === 0 && !error && (
-                <tr><td colSpan={6} className='px-6 py-6 text-center text-slate-400'>Chưa có payout nào</td></tr>
+                <tr>
+                  <td colSpan={7} className='px-6 py-6 text-center text-slate-400'>
+                    Chưa có payout nào
+                  </td>
+                </tr>
               )}
+
               {!loading && payouts.map((p) => (
                 <tr key={p.id} className='hover:bg-slate-50'>
                   <td className='px-6 py-3 font-medium text-slate-800'>{p.payout_code}</td>
@@ -91,11 +128,31 @@ const HotelPayouts = () => {
                   <td className='px-6 py-3 text-slate-600'>{formatMoney(p.total_commission)}</td>
                   <td className='px-6 py-3 font-medium text-slate-800'>{formatMoney(p.payout_amount)}</td>
                   <td className='px-6 py-3'>
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusLabel[p.status]?.className || 'bg-slate-100 text-slate-500'}`}>
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                        statusLabel[p.status]?.className || 'bg-slate-100 text-slate-500'
+                      }`}
+                    >
                       {statusLabel[p.status]?.text || p.status}
                     </span>
                   </td>
-                  <td className='px-6 py-3 text-slate-500'>{new Date(p.created_at).toLocaleDateString('vi-VN')}</td>
+                  <td className='px-6 py-3 text-slate-500'>
+                    {new Date(p.created_at).toLocaleDateString('vi-VN')}
+                  </td>
+                  <td className='px-6 py-3'>
+                    {p.status === 'PAID' ? (
+                      <button
+                        type='button'
+                        disabled={confirmingId === p.id}
+                        onClick={() => handleConfirmReceived(p)}
+                        className='text-emerald-600 hover:underline text-[13px] font-semibold disabled:opacity-50'
+                      >
+                        {confirmingId === p.id ? 'Đang xác nhận...' : 'Xác nhận đã nhận tiền'}
+                      </button>
+                    ) : (
+                      <span className='text-slate-300 text-[13px]'>—</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

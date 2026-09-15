@@ -11,6 +11,7 @@ const statusOptions = ['PENDING', 'PAID', 'CANCELLED']
 const statusLabel: Record<string, { text: string; className: string }> = {
   PENDING: { text: 'Chờ chi trả', className: 'bg-amber-50 text-amber-600' },
   PAID: { text: 'Đã chi trả', className: 'bg-emerald-50 text-emerald-600' },
+  CONFIRMED: { text: 'Hotel đã xác nhận nhận tiền', className: 'bg-teal-50 text-teal-600' },
   CANCELLED: { text: 'Đã hủy', className: 'bg-red-50 text-red-600' }
 }
 
