@@ -57,6 +57,7 @@ const Payment = () => {
   const [bookingStatus, setBookingStatus] = useState<string | null>(state.bookingStatus || null)
   const [isCancelling, setIsCancelling] = useState(false)
   const [error, setError] = useState('')
+  const [cancelError, setCancelError] = useState('')
 
   const [customer, setCustomer] = useState({
     fullName: '',
@@ -239,15 +240,14 @@ const Payment = () => {
       return
     }
 
-    if (bookingStatus !== 'PENDING') return
-
-    if (!window.confirm(`Bạn có chắc muốn hủy thanh toán cho booking "${bookingCode}"?`)) {
-      return
-    }
+    // DEMO DEADLOCK: bỏ điều kiện "bookingStatus !== 'PENDING' return" và
+    // bỏ window.confirm chặn thao tác, để có thể bấm "Hủy thanh toán" NGAY
+    // trong lúc nút "Thanh toán" đang xử lý (isSubmitting = true), trên
+    // cùng 1 tab, không cần rời trang Payment.
 
     try {
       setIsCancelling(true)
-      setError('')
+      setCancelError('')
       const response = await bookingApi.updateStatus(bookingId, 'CANCELLED')
       setBookingStatus(response.data.data?.status || 'CANCELLED')
     } catch (requestError: unknown) {
@@ -257,7 +257,7 @@ const Payment = () => {
           ? requestError.message
           : ''
 
-      setError(responseMessage || 'Không thể hủy thanh toán. Vui lòng thử lại.')
+      setCancelError(responseMessage || 'Không thể hủy thanh toán. Vui lòng thử lại.')
     } finally {
       setIsCancelling(false)
     }
@@ -787,7 +787,7 @@ const Payment = () => {
                   <button
                     type='button'
                     onClick={handleCancelPayment}
-                    disabled={isSubmitting || isCancelling || bookingStatus === 'CANCELLED'}
+                    disabled={isCancelling || bookingStatus === 'CANCELLED'}
                     className='inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 py-4 font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50'
                   >
                     <FiXCircle />
@@ -815,7 +815,11 @@ const Payment = () => {
                 )}
 
                 {error && (
-                  <p className='text-red-500 text-sm mt-3'>{error}</p>
+                  <p className='text-red-500 text-sm mt-3'>[Thanh toán] {error}</p>
+                )}
+
+                {cancelError && (
+                  <p className='text-red-500 text-sm mt-3'>[Hủy thanh toán] {cancelError}</p>
                 )}
 
                 <div className='flex items-center justify-center gap-2 text-xs text-gray-500 mt-4'>
