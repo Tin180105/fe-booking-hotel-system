@@ -36,6 +36,9 @@ const RoomConfirmation = () => {
   const [children, setChildren] = useState(Math.max(0, state.children || 0))
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [livePrice, setLivePrice] = useState(state.price || 0)
+  const [isRefreshingPrice, setIsRefreshingPrice] = useState(false)
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null)
 
   const formatPrice = (price: number) => `${price.toLocaleString('vi-VN')}đ`
   const maxRooms = Math.max(1, state.availableRooms || 1)
@@ -47,9 +50,29 @@ const RoomConfirmation = () => {
     }
 
     roomApi.getById(state.roomTypeId)
-      .then((response) => setHotelId(response.data.data.hotel_id))
+      .then((response) => {
+        setHotelId(response.data.data.hotel_id)
+        setLivePrice(Number(response.data.data.base_price))
+      })
       .catch(() => setError('Không thể tải đầy đủ thông tin phòng. Vui lòng thử lại.'))
   }, [hotelId, state.roomTypeId])
+
+  // Đọc lại giá phòng MỚI NHẤT từ server ngay trước khi khách xác nhận —
+  // gọi cùng API GET /roomTypes/:id như lúc tải trang, không có gì "giả".
+  const refreshPrice = async () => {
+    if (!state.roomTypeId) return
+
+    try {
+      setIsRefreshingPrice(true)
+      const response = await roomApi.getById(state.roomTypeId)
+      setLivePrice(Number(response.data.data.base_price))
+      setLastRefreshedAt(new Date())
+    } catch {
+      setError('Không thể làm mới giá phòng. Vui lòng thử lại.')
+    } finally {
+      setIsRefreshingPrice(false)
+    }
+  }
 
   const goToPayment = async () => {
     if (!isAuthenticated || !profile?.id) {
@@ -283,12 +306,25 @@ const RoomConfirmation = () => {
             <h2 className='text-xl font-bold text-[#173f67]'>Tóm tắt đặt phòng</h2>
             <div className='mt-5 flex justify-between border-b border-slate-100 pb-4 text-slate-600'>
               <span>Giá phòng</span>
-              <strong className='text-slate-800'>{formatPrice(state.price || 0)}</strong>
+              <strong className='text-slate-800'>{formatPrice(livePrice)}</strong>
             </div>
             <div className='mt-4 flex justify-between text-lg font-bold text-[#173f67]'>
               <span>Tạm tính</span>
-              <span>{formatPrice((state.price || 0) * roomQuantity)}</span>
+              <span>{formatPrice(livePrice * roomQuantity)}</span>
             </div>
+            <button
+              type='button'
+              onClick={refreshPrice}
+              disabled={isRefreshingPrice}
+              className='mt-3 w-full rounded-lg border border-slate-200 py-2 text-sm font-semibold text-[#173f67] hover:bg-slate-50 disabled:opacity-60'
+            >
+              {isRefreshingPrice ? 'Đang làm mới giá...' : 'Làm mới giá'}
+            </button>
+            {lastRefreshedAt && (
+              <p className='mt-2 text-xs text-slate-400'>
+                Giá cập nhật lúc {lastRefreshedAt.toLocaleTimeString('vi-VN')}
+              </p>
+            )}
             <button
               type='button'
               onClick={goToPayment}

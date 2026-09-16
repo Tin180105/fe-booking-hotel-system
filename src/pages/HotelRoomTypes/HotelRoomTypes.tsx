@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { MdClose } from 'react-icons/md'
 
@@ -36,6 +36,21 @@ const HotelRoomTypes = () => {
   const [form, setForm] = useState<RoomTypeFormState>(emptyForm)
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  // Sau khi bấm "Lưu" ở chế độ Sửa: ghi tạm (chưa commit) và đếm ngược
+  // chờ xác nhận. Có thể bấm "Huỷ ngay" trong lúc chờ để rollback.
+  const CONFIRM_SECONDS = 8
+  const [staging, setStaging] = useState<{ stagingId: string; secondsLeft: number } | null>(null)
+  const stagingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const clearStagingTimer = () => {
+    if (stagingIntervalRef.current) {
+      clearInterval(stagingIntervalRef.current)
+      stagingIntervalRef.current = null
+    }
+  }
+
+  useEffect(() => () => clearStagingTimer(), [])
 
   const fetchRoomTypes = async () => {
     if (!hotelId) return
@@ -82,8 +97,47 @@ const HotelRoomTypes = () => {
   }
 
   const closeForm = () => {
+    // Nếu đang có thay đổi giữ tạm chưa xác nhận mà admin đóng form,
+    // coi như huỷ bỏ (rollback), không được để transaction treo lại.
+    if (staging) {
+      cancelStaging(false)
+    }
     setIsFormOpen(false)
     setFormError('')
+  }
+
+  // Sau khi hết giờ đếm ngược mà admin không huỷ -> tự xác nhận (COMMIT)
+  const confirmStaging = async (stagingId: string) => {
+    clearStagingTimer()
+    try {
+      await roomApi.confirmUpdate(stagingId)
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setFormError(err.response?.data?.message || 'Không thể xác nhận lưu')
+      }
+    } finally {
+      setStaging(null)
+      setIsFormOpen(false)
+      await fetchRoomTypes()
+    }
+  }
+
+  // Admin bấm "Huỷ ngay" trong lúc đang đếm ngược -> ROLLBACK, giá cũ giữ nguyên
+  const cancelStaging = async (closeAfter = true) => {
+    if (!staging) return
+    const stagingId = staging.stagingId
+    clearStagingTimer()
+    setStaging(null)
+    try {
+      await roomApi.cancelUpdate(stagingId)
+    } catch {
+      // đã hết hạn/huỷ trước đó, bỏ qua
+    } finally {
+      if (closeAfter) {
+        setIsFormOpen(false)
+      }
+      await fetchRoomTypes()
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -127,12 +181,27 @@ const HotelRoomTypes = () => {
 
       if (formMode === 'create') {
         await roomApi.create(payload)
+        setIsFormOpen(false)
+        await fetchRoomTypes()
       } else if (editingId) {
-        await roomApi.update(editingId, payload)
-      }
+        // Bấm "Lưu" ở chế độ Sửa: ghi tạm (chưa commit), giữ form mở và
+        // đếm ngược chờ xác nhận thay vì lưu xong ngay lập tức.
+        const response = await roomApi.stageUpdate(editingId, payload)
+        const stagingId = response.data.data.stagingId
+        setStaging({ stagingId, secondsLeft: CONFIRM_SECONDS })
 
-      setIsFormOpen(false)
-      await fetchRoomTypes()
+        stagingIntervalRef.current = setInterval(() => {
+          setStaging((current) => {
+            if (!current) return current
+            if (current.secondsLeft <= 1) {
+              clearStagingTimer()
+              confirmStaging(current.stagingId)
+              return current
+            }
+            return { ...current, secondsLeft: current.secondsLeft - 1 }
+          })
+        }, 1000)
+      }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setFormError(err.response?.data?.message || 'Thao tác thất bại')
@@ -305,18 +374,33 @@ const HotelRoomTypes = () => {
                 />
               </div>
 
-              <div className='flex justify-end gap-3'>
-                <button type='button' onClick={closeForm} className='px-5 py-2.5 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50'>
-                  Hủy
-                </button>
-                <button
-                  type='submit'
-                  disabled={submitting}
-                  className='px-5 py-2.5 rounded-md bg-[#0280ff] text-white font-semibold hover:bg-[#1612eb] disabled:opacity-60'
-                >
-                  {submitting ? 'Đang lưu...' : formMode === 'create' ? 'Tạo loại phòng' : 'Lưu thay đổi'}
-                </button>
-              </div>
+              {staging ? (
+                <div className='flex items-center justify-between rounded-md bg-amber-50 border border-amber-200 px-4 py-3'>
+                  <span className='text-sm text-amber-700'>
+                    Đang chờ xác nhận lưu... ({staging.secondsLeft}s) — trong lúc này khách xem phòng vẫn thấy giá mới dù chưa lưu hẳn.
+                  </span>
+                  <button
+                    type='button'
+                    onClick={() => cancelStaging()}
+                    className='ml-3 shrink-0 px-4 py-2 rounded-md border border-amber-300 text-amber-700 font-semibold hover:bg-amber-100'
+                  >
+                    Huỷ ngay
+                  </button>
+                </div>
+              ) : (
+                <div className='flex justify-end gap-3'>
+                  <button type='button' onClick={closeForm} className='px-5 py-2.5 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50'>
+                    Hủy
+                  </button>
+                  <button
+                    type='submit'
+                    disabled={submitting}
+                    className='px-5 py-2.5 rounded-md bg-[#0280ff] text-white font-semibold hover:bg-[#1612eb] disabled:opacity-60'
+                  >
+                    {submitting ? 'Đang lưu...' : formMode === 'create' ? 'Tạo loại phòng' : 'Lưu thay đổi'}
+                  </button>
+                </div>
+              )}
             </form>
           </div>
         </div>

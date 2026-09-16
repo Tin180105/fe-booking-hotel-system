@@ -57,7 +57,21 @@ const roomApi = {
         { params: { checkIn, checkOut } }
     )
   },
-  
+
+  // Bấm "Lưu" -> ghi tạm, chờ xác nhận hoặc huỷ (chưa commit)
+  stageUpdate(id: number, body: Omit<CreateRoomTypePayload, 'hotel_id'>) {
+    return http.post<ApiResponse<{ stagingId: string; preview: RoomType }>>(
+      `/roomTypes/${id}/stage`,
+      body
+    )
+  },
+  confirmUpdate(stagingId: string) {
+    return http.post<ApiResponse<RoomType>>(`/roomTypes/staging/${stagingId}/confirm`)
+  },
+  cancelUpdate(stagingId: string) {
+    return http.post<ApiResponse<RoomType>>(`/roomTypes/staging/${stagingId}/cancel`)
+  }
+
 }
 
 export default roomApi
