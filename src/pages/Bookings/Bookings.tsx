@@ -15,8 +15,10 @@ import { useAuth } from '../../contexts/app.context'
 interface Booking {
   id: number
   bookingCode: string
+  hotelId: number
   hotelName: string
   hotelAddress: string
+  roomTypeId: number
   roomName: string
   image: string
   checkIn: string
@@ -74,8 +76,10 @@ const Bookings = () => {
           Array.from(groupedBookings.values()).map((row) => ({
             id: row.booking_id,
             bookingCode: row.booking_code,
+            hotelId: row.hotel_id,
             hotelName: row.hotel_name,
             hotelAddress: `${row.hotel_address}, ${row.hotel_city}`,
+            roomTypeId: row.room_type_id,
             roomName: row.room_type_name,
             image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=900',
             checkIn: new Date(row.expected_check_in).toLocaleDateString('vi-VN'),
@@ -389,8 +393,10 @@ const Bookings = () => {
                               bookingId: booking.id,
                               bookingCode: booking.bookingCode,
                               bookingStatus: booking.rawStatus,
+                              hotelId: booking.hotelId,
                               hotelName: booking.hotelName,
                               hotelAddress: booking.hotelAddress,
+                              roomTypeId: booking.roomTypeId,
                               roomName: booking.roomName,
                               imageUrl: booking.image,
                               checkIn: booking.rawCheckIn,

@@ -113,6 +113,12 @@ const Payment = () => {
     return price.toLocaleString('vi-VN') + 'đ'
   }
 
+  const formatDate = (value?: string) => {
+    if (!value) return '--/--/----'
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return value
+    return date.toLocaleDateString('vi-VN')
+  }
 
   const calculateNights = () => {
     if (!state.checkIn || !state.checkOut) {
@@ -184,11 +190,6 @@ const Payment = () => {
       return
     }
 
-    if (!state.hotelId || !state.roomTypeId || !state.checkIn || !state.checkOut) {
-      setError('Thông tin phòng hoặc ngày lưu trú chưa đầy đủ.')
-      return
-    }
-
     setIsSubmitting(true)
     setError('')
 
@@ -197,6 +198,11 @@ const Payment = () => {
       let paymentAmount = Number(state.finalAmount ?? 0)
 
       if (!paymentBookingId) {
+        if (!state.hotelId || !state.roomTypeId || !state.checkIn || !state.checkOut) {
+          setError('Thông tin phòng hoặc ngày lưu trú chưa đầy đủ.')
+          return
+        }
+
         const bookingResponse = await bookingApi.create({
           hotel_id: state.hotelId,
           customer_id: profile.id,
@@ -445,7 +451,7 @@ const Payment = () => {
                   </p>
 
                   <p className='font-semibold text-[#173f67]'>
-                    {state.checkIn || '--/--/----'}
+                    {formatDate(state.checkIn)}
                   </p>
                 </div>
 
@@ -455,7 +461,7 @@ const Payment = () => {
                   </p>
 
                   <p className='font-semibold text-[#173f67]'>
-                    {state.checkOut || '--/--/----'}
+                    {formatDate(state.checkOut)}
                   </p>
                 </div>
 
@@ -481,15 +487,17 @@ const Payment = () => {
 
               </div>
 
-              <div className='flex flex-wrap gap-5 mt-5 text-sm text-gray-600'>
-                <span>
-                  👤 {state.adults || 0} người lớn
-                </span>
+              {(state.adults !== undefined || state.children !== undefined) && (
+                <div className='flex flex-wrap gap-5 mt-5 text-sm text-gray-600'>
+                  <span>
+                    👤 {state.adults || 0} người lớn
+                  </span>
 
-                <span>
-                  👶 {state.children || 0} trẻ em
-                </span>
-              </div>
+                  <span>
+                    👶 {state.children || 0} trẻ em
+                  </span>
+                </div>
+              )}
 
             </section>
 
