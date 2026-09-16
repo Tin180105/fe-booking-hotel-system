@@ -12,6 +12,7 @@ import Promotions from '../pages/Promotions'
 import Payment from '../pages/Payment'
 import Bookings from '../pages/Bookings/Bookings'
 import BookingDetail from '../pages/BookingDetail/BookingDetail'
+import DemoDirtyRead from '../pages/DemoDirtyRead/DemoDirtyRead'
 
 import path from '../constants/path'
 
@@ -69,6 +70,11 @@ const publicRoutes: RouteObject[] = [
         path: '/bookings/:id',
         element: <BookingDetail />
       },
+
+      {
+        path: '/demo-dirty-read',
+        element: <DemoDirtyRead />
+      }
 
     ]
   }

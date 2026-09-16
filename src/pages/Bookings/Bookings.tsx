@@ -21,9 +21,12 @@ interface Booking {
   image: string
   checkIn: string
   checkOut: string
+  rawCheckIn: string
+  rawCheckOut: string
   rooms: number
   guests: number
   totalPrice: number
+  rawStatus: string
   status: 'upcoming' | 'completed' | 'cancelled'
   statusText: string
 }
@@ -77,9 +80,12 @@ const Bookings = () => {
             image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=900',
             checkIn: new Date(row.expected_check_in).toLocaleDateString('vi-VN'),
             checkOut: new Date(row.expected_check_out).toLocaleDateString('vi-VN'),
+            rawCheckIn: row.expected_check_in,
+            rawCheckOut: row.expected_check_out,
             rooms: row.room_quantity,
             guests: row.room_capacity,
             totalPrice: row.final_amount,
+            rawStatus: row.booking_status,
             status: getBookingStatus(row.booking_status),
             statusText: getBookingStatusText(row.booking_status)
           }))
@@ -373,6 +379,32 @@ const Bookings = () => {
                   </div>
 
                   <div className='flex gap-3'>
+
+                    {booking.rawStatus === 'PENDING' && (
+                      <button
+                        type='button'
+                        onClick={() =>
+                          navigate('/payment', {
+                            state: {
+                              bookingId: booking.id,
+                              bookingCode: booking.bookingCode,
+                              bookingStatus: booking.rawStatus,
+                              hotelName: booking.hotelName,
+                              hotelAddress: booking.hotelAddress,
+                              roomName: booking.roomName,
+                              imageUrl: booking.image,
+                              checkIn: booking.rawCheckIn,
+                              checkOut: booking.rawCheckOut,
+                              rooms: booking.rooms,
+                              finalAmount: booking.totalPrice
+                            }
+                          })
+                        }
+                        className='bg-[#ff9d1c] text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-[#f18d0b] transition'
+                      >
+                        Tiếp tục thanh toán
+                      </button>
+                    )}
 
                     {booking.status === 'upcoming' && (
                       <button

@@ -60,7 +60,4 @@ const roomApi = {
   
 }
 
-
-
-
 export default roomApi

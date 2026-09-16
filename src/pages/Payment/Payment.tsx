@@ -58,6 +58,10 @@ const Payment = () => {
   const [isCancelling, setIsCancelling] = useState(false)
   const [error, setError] = useState('')
   const [cancelError, setCancelError] = useState('')
+  const [nonRepeatableWarning, setNonRepeatableWarning] = useState<{
+    firstReadStatus: string
+    secondReadStatus: string
+  } | null>(null)
 
   const [customer, setCustomer] = useState({
     fullName: '',
@@ -97,6 +101,7 @@ const Payment = () => {
     loadSavedPromotions()
   }, [isAuthenticated])
 
+  const hasUnitPrice = Boolean(state.price)
   const roomPrice = state.price || 0
   const roomQuantity = state.rooms || 1
 
@@ -107,6 +112,7 @@ const Payment = () => {
   const formatPrice = (price: number) => {
     return price.toLocaleString('vi-VN') + 'đ'
   }
+
 
   const calculateNights = () => {
     if (!state.checkIn || !state.checkOut) {
@@ -127,6 +133,12 @@ const Payment = () => {
   }
 
   const nights = calculateNights()
+
+  // Khi vào bằng "Tiếp tục thanh toán" (booking đã tồn tại), không còn đơn giá
+  // phòng gốc để tính lại từ đầu -> dùng thẳng final_amount đã lưu của booking.
+  const displayTotal = hasUnitPrice
+    ? Math.max(0, finalPrice * nights)
+    : Math.max(0, Number(state.finalAmount ?? 0) - discount)
 
   const applyPromotion = (promotion: Promotion) => {
     const rawDiscount = promotion.discount_type === 'PERCENTAGE'
@@ -208,6 +220,15 @@ const Payment = () => {
         payment_method: paymentMethod,
         amount: paymentAmount
       })
+      const check = paymentResponse.data.data.nonRepeatableCheck
+      if (check?.changed) {
+        setNonRepeatableWarning({
+          firstReadStatus: check.firstReadStatus,
+          secondReadStatus: check.secondReadStatus
+        })
+      } else {
+        setNonRepeatableWarning(null)
+      }
 
       if (paymentResponse.data.data.payment_status !== 'SUCCESS') {
         setBookingStatus('PENDING')
@@ -645,6 +666,7 @@ const Payment = () => {
                 </div>
 
                 {/* Price */}
+                {hasUnitPrice && (
                 <div className='space-y-3 text-sm'>
 
                   <div className='flex justify-between'>
@@ -690,6 +712,7 @@ const Payment = () => {
                   </div>
 
                 </div>
+                )}
 
                 {/* Promotion */}
                 <div className='mt-5'>
@@ -771,12 +794,7 @@ const Payment = () => {
                     </div>
 
                     <p className='text-2xl font-bold text-[#ff9d1c]'>
-                      {formatPrice(
-                        Math.max(
-                          0,
-                          finalPrice * nights
-                        )
-                      )}
+                      {formatPrice(displayTotal)}
                     </p>
 
                   </div>
@@ -804,6 +822,13 @@ const Payment = () => {
                   </button>
                 </div>
 
+                {isSubmitting && (
+                  <div className='mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700'>
+                    ⏳ Đang chờ cổng thanh toán phản hồi, việc này có thể mất vài giây...
+                    Nếu chờ quá lâu, bạn vẫn có thể bấm <strong>"Hủy thanh toán"</strong> ngay bây giờ.
+                  </div>
+                )}
+
                 {bookingStatus && (
                   <div className='mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-[#173f67]'>
                     <div className='flex items-center justify-between gap-3'>
@@ -821,6 +846,14 @@ const Payment = () => {
                 {cancelError && (
                   <p className='text-red-500 text-sm mt-3'>[Hủy thanh toán] {cancelError}</p>
                 )}
+                {nonRepeatableWarning && (
+                <div className='mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700'>
+                  ⚠️ Trạng thái booking đã thay đổi trong lúc hệ thống chờ cổng thanh toán phản hồi
+                  (Non-repeatable Read): lúc bắt đầu xử lý là{' '}
+                  <strong>{nonRepeatableWarning.firstReadStatus}</strong>, nhưng khi xác nhận lại là{' '}
+                  <strong>{nonRepeatableWarning.secondReadStatus}</strong>.
+                </div>
+              )}
 
                 <div className='flex items-center justify-center gap-2 text-xs text-gray-500 mt-4'>
                   <FiShield className='text-green-500' />
