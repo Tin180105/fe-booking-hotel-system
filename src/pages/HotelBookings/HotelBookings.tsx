@@ -11,6 +11,12 @@ const statusLabel: Record<string, { text: string; className: string }> = {
   COMPLETED: { text: 'Hoàn tất', className: 'bg-emerald-50 text-emerald-600' }
 }
 
+// Khách sạn chỉ tự đổi được các trạng thái vận hành của mình (xác nhận
+// khi khách nhận phòng, hoàn tất khi khách trả phòng). Việc HUỶ booking
+// ảnh hưởng tới hoa hồng/hoàn tiền nên để CSKH (admin) hoặc khách hàng
+// tự huỷ, khách sạn không tự huỷ thay ở đây.
+const HOTEL_EDITABLE_STATUS = ['PENDING', 'CONFIRMED', 'COMPLETED']
+
 const HotelBookings = () => {
   const { profile } = useAuth()
   const hotelId = profile?.hotel_id
@@ -18,6 +24,7 @@ const HotelBookings = () => {
   const [bookings, setBookings] = useState<BookingByHotelRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [statusUpdatingId, setStatusUpdatingId] = useState<number | null>(null)
 
   const fetchBookings = async () => {
     if (!hotelId) return
@@ -40,6 +47,27 @@ const HotelBookings = () => {
   useEffect(() => {
     fetchBookings()
   }, [hotelId])
+
+  const handleChangeStatus = async (bookingId: number, status: string) => {
+    try {
+      setStatusUpdatingId(bookingId)
+      setError('')
+
+      await bookingApi.updateStatus(bookingId, status)
+
+      setBookings((prev) =>
+        prev.map((b) => (b.id === bookingId ? { ...b, status } : b))
+      )
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Không thể cập nhật trạng thái')
+      } else {
+        setError('Đã xảy ra lỗi không xác định')
+      }
+    } finally {
+      setStatusUpdatingId(null)
+    }
+  }
 
   return (
     <div className='p-8'>
@@ -75,6 +103,13 @@ const HotelBookings = () => {
               )}
               {!loading && bookings.map((b) => {
                 const status = statusLabel[b.status] || { text: b.status, className: 'bg-slate-100 text-slate-500' }
+                // Nếu booking đang ở trạng thái ngoài danh sách khách sạn tự
+                // sửa được (VD: đã CANCELLED) thì vẫn phải có mặt trong
+                // <option> để <select> hiển thị đúng giá trị hiện tại.
+                const options = HOTEL_EDITABLE_STATUS.includes(b.status)
+                  ? HOTEL_EDITABLE_STATUS
+                  : [b.status, ...HOTEL_EDITABLE_STATUS]
+
                 return (
                   <tr key={b.id} className='hover:bg-slate-50'>
                     <td className='px-6 py-3 font-medium text-slate-800'>{b.booking_code}</td>
@@ -85,9 +120,18 @@ const HotelBookings = () => {
                       {new Intl.NumberFormat('vi-VN').format(b.final_amount)} đ
                     </td>
                     <td className='px-6 py-3'>
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${status.className}`}>
-                        {status.text}
-                      </span>
+                      <select
+                        value={b.status}
+                        disabled={statusUpdatingId === b.id || b.status === 'CANCELLED'}
+                        onChange={(e) => handleChangeStatus(b.id, e.target.value)}
+                        className={`px-2.5 py-1 rounded-full text-xs font-medium border-none outline-none cursor-pointer ${status.className} disabled:opacity-50 disabled:cursor-not-allowed`}
+                      >
+                        {options.map((s) => (
+                          <option key={s} value={s}>
+                            {statusLabel[s]?.text || s}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className='px-6 py-3 text-slate-500'>
                       {new Date(b.created_at).toLocaleDateString('vi-VN')}
