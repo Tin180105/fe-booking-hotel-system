@@ -7,6 +7,16 @@ export interface CreatePaymentRequest {
   amount: number
 }
 
+// export interface CreatePaymentResponse {
+//   success: boolean
+//   message: string
+//   data: {
+//     id: number
+//     booking_id: number
+//     payment_status: string
+//     amount: number
+//   }
+// }
 export interface CreatePaymentResponse {
   success: boolean
   message: string
@@ -15,8 +25,14 @@ export interface CreatePaymentResponse {
     booking_id: number
     payment_status: string
     amount: number
+    nonRepeatableCheck?: {
+      firstReadStatus: string
+      secondReadStatus: string
+      changed: boolean
+    }
   }
 }
+
 
 const paymentApi = {
   create(body: CreatePaymentRequest) {

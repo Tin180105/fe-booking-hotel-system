@@ -117,6 +117,18 @@ const bookingApi = {
 
   create(body: CreateBookingRequest) {
     return http.post<CreateBookingResponse>('/bookings', body)
+  },
+  demoDirtyWrite(id: number, tempStatus: string, delayMs?: number) {
+    return http.post<{ success: boolean; message: string; data: any }>(
+      `/bookings/${id}/demo-dirty-write`,
+      { tempStatus, delayMs }
+    )
+  },
+
+  demoDirtyRead(id: number) {
+    return http.get<{ success: boolean; data: { id: number; status: string; updated_at: string }; readAt: string }>(
+      `/bookings/${id}/demo-dirty-read`
+    )
   }
 }
 

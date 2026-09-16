@@ -9,6 +9,7 @@ import bookingApi, {
 
 const ALLOWED_STATUS = ['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']
 
+
 const statusLabel: Record<string, { text: string; className: string }> = {
   PENDING: { text: 'Chờ xác nhận', className: 'bg-amber-50 text-amber-600' },
   CONFIRMED: { text: 'Đã xác nhận', className: 'bg-blue-50 text-blue-600' },
@@ -109,6 +110,12 @@ const AdminBookings = () => {
   const [detail, setDetail] = useState<BookingDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
 
+  // lỗi non-reatable
+  const [firstReadStatus, setFirstReadStatus] = useState<string | null>(null)
+  const [firstReadTime, setFirstReadTime] = useState<string | null>(null)
+  const [secondReadStatus, setSecondReadStatus] = useState<string | null>(null)
+  const [secondReadTime, setSecondReadTime] = useState<string | null>(null)
+
   const fetchBookings = async () => {
     try {
       setLoading(true)
@@ -201,18 +208,58 @@ const AdminBookings = () => {
   }
 
   // ===== VIEW DETAIL =====
+  // const openDetail = async (bookingId: number) => {
+  //   setIsDetailOpen(true)
+  //   setDetail(null)
+  //   setDetailLoading(true)
+
+  //   try {
+  //     const response = await bookingApi.getById(bookingId)
+  //     setDetail(response.data?.data || null)
+  //   } catch (err) {
+  //     console.error('[AdminBookings] get detail failed', err)
+  //   } finally {
+  //     setDetailLoading(false)
+  //   }
+  // } --> lỗi non-reatable
   const openDetail = async (bookingId: number) => {
     setIsDetailOpen(true)
     setDetail(null)
     setDetailLoading(true)
+    setFirstReadStatus(null)
+    setFirstReadTime(null)
+    setSecondReadStatus(null)
+    setSecondReadTime(null)
 
     try {
       const response = await bookingApi.getById(bookingId)
-      setDetail(response.data?.data || null)
+      const data = response.data?.data || null
+      setDetail(data)
+
+      if (data) {
+        setFirstReadStatus(data.status)
+        setFirstReadTime(new Date().toLocaleTimeString('vi-VN'))
+      }
     } catch (err) {
       console.error('[AdminBookings] get detail failed', err)
     } finally {
       setDetailLoading(false)
+    }
+  }
+  const rereadDetail = async () => {
+    if (!detail) return
+
+    try {
+      const response = await bookingApi.getById(detail.id)
+      const data = response.data?.data || null
+
+      if (data) {
+        setDetail(data)
+        setSecondReadStatus(data.status)
+        setSecondReadTime(new Date().toLocaleTimeString('vi-VN'))
+      }
+    } catch (err) {
+      console.error('[AdminBookings] reread detail failed', err)
     }
   }
 
@@ -392,6 +439,35 @@ const AdminBookings = () => {
 
               {!detailLoading && detail && (
                 <div className='space-y-5'>
+                  <div className='rounded-lg border border-dashed border-orange-300 bg-orange-50 p-4 text-sm'>
+                    <p className='font-semibold text-orange-700 mb-2'>🧪 Demo Non-repeatable Read</p>
+
+                    {firstReadStatus && (
+                      <p>
+                        📖 Lần đọc 1 <span className='text-slate-400'>({firstReadTime})</span>: <strong>{firstReadStatus}</strong>
+                      </p>
+                    )}
+
+                    {secondReadStatus && (
+                      <p>
+                        📖 Lần đọc 2 <span className='text-slate-400'>({secondReadTime})</span>: <strong>{secondReadStatus}</strong>
+                      </p>
+                    )}
+
+                    {secondReadStatus && firstReadStatus && secondReadStatus !== firstReadStatus && (
+                      <p className='mt-2 font-semibold text-red-600'>
+                        ⚠️ NON-REPEATABLE READ: cùng 1 booking, cùng phiên xem, nhưng 2 lần đọc cho kết quả khác nhau!
+                      </p>
+                    )}
+
+                    <button
+                      type='button'
+                      onClick={rereadDetail}
+                      className='mt-3 px-4 py-2 rounded-md bg-orange-500 text-white text-xs font-semibold hover:bg-orange-600'
+                    >
+                      Đọc lại (giả lập lần đọc thứ 2)
+                    </button>
+                  </div>
                   <div className='grid grid-cols-2 gap-4'>
                     <div>
                       <p className='text-xs uppercase text-slate-400 mb-1'>Khách hàng</p>

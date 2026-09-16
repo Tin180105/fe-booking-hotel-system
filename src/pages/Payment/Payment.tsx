@@ -57,6 +57,10 @@ const Payment = () => {
   const [bookingStatus, setBookingStatus] = useState<string | null>(state.bookingStatus || null)
   const [isCancelling, setIsCancelling] = useState(false)
   const [error, setError] = useState('')
+  const [nonRepeatableWarning, setNonRepeatableWarning] = useState<{
+  firstReadStatus: string
+  secondReadStatus: string
+} | null>(null)
 
   const [customer, setCustomer] = useState({
     fullName: '',
@@ -106,6 +110,7 @@ const Payment = () => {
   const formatPrice = (price: number) => {
     return price.toLocaleString('vi-VN') + 'đ'
   }
+  
 
   const calculateNights = () => {
     if (!state.checkIn || !state.checkOut) {
@@ -207,6 +212,15 @@ const Payment = () => {
         payment_method: paymentMethod,
         amount: paymentAmount
       })
+      const check = paymentResponse.data.data.nonRepeatableCheck
+      if (check?.changed) {
+        setNonRepeatableWarning({
+          firstReadStatus: check.firstReadStatus,
+          secondReadStatus: check.secondReadStatus
+        })
+      } else {
+        setNonRepeatableWarning(null)
+      }
 
       if (paymentResponse.data.data.payment_status !== 'SUCCESS') {
         setBookingStatus('PENDING')
@@ -816,7 +830,16 @@ const Payment = () => {
 
                 {error && (
                   <p className='text-red-500 text-sm mt-3'>{error}</p>
+                  
                 )}
+                {nonRepeatableWarning && (
+                <div className='mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700'>
+                  ⚠️ Trạng thái booking đã thay đổi trong lúc hệ thống chờ cổng thanh toán phản hồi
+                  (Non-repeatable Read): lúc bắt đầu xử lý là{' '}
+                  <strong>{nonRepeatableWarning.firstReadStatus}</strong>, nhưng khi xác nhận lại là{' '}
+                  <strong>{nonRepeatableWarning.secondReadStatus}</strong>.
+                </div>
+              )}
 
                 <div className='flex items-center justify-center gap-2 text-xs text-gray-500 mt-4'>
                   <FiShield className='text-green-500' />
