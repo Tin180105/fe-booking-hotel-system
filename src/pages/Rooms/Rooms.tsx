@@ -749,17 +749,18 @@ useEffect(() => {
 
                           <div className='w-full mt-5 md:mt-0'>
 
-                            <p className='text-right text-orange-500 text-xs font-semibold mb-3'>
-                              Chỉ còn {room.available} phòng
+                            <p className={`text-right text-xs font-semibold mb-3 ${room.available > 0 ? 'text-orange-500' : 'text-red-500'}`}>
+                              {room.available > 0 ? `Chỉ còn ${room.available} phòng` : 'Hết phòng trong thời gian này'}
                             </p>
 
                             <button
                               onClick={() =>
                                 handleSelectRoom(room)
                               }
-                              className='w-full bg-[#ff9d1c] hover:bg-[#e88908] text-white font-bold py-3.5 rounded-xl transition shadow-sm hover:shadow-lg'
+                              disabled={room.available <= 0}
+                              className='w-full bg-[#ff9d1c] hover:bg-[#e88908] text-white font-bold py-3.5 rounded-xl transition shadow-sm hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[#ff9d1c]'
                             >
-                              Chọn phòng
+                              {room.available > 0 ? 'Chọn phòng' : 'Hết phòng'}
                             </button>
 
                             <button
